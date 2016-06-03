@@ -121,6 +121,7 @@
 ;; Enterを押した際に同じバッファでファイルを開く
 (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
 
+
 ;;
 ;; キーバインド設定
 ;;
@@ -160,8 +161,6 @@
 
 ;; Macのoptionをメタキーにする
 (setq mac-option-modifier 'meta)
-
-
 
 
 ;;
@@ -234,14 +233,22 @@
 (define-key helm-find-files-map (kbd "C-h") 'delete-backward-char)
 (define-key helm-find-files-map (kbd "TAB") 'helm-execute-persistent-action)
 (define-key helm-read-file-map (kbd "TAB") 'helm-execute-persistent-action)
-(global-set-key (kbd "C-c h") 'helm-mini)
 (global-set-key (kbd "M-y") 'helm-show-kill-ring)
 (global-set-key (kbd "M-x") 'helm-M-x)
+(define-key global-map (kbd "C-c i")   'helm-imenu)
+(global-set-key (kbd "C-c h") 'helm-mini)
 (define-key global-map (kbd "C-x C-f") 'helm-find-files)
 (define-key global-map (kbd "C-x b") 'helm-for-files)
 (define-key global-map (kbd "C-c g") 'helm-grep-do-git-grep)
 ;; helm-descbinds用キーバインド
 (global-set-key (kbd "C-c b") 'helm-descbinds)
+;; TABでnew bufferが作成しない(ファイルがない時は何もしない)
+(defadvice helm-ff-kill-or-find-buffer-fname (around execute-only-if-exist activate)
+  "Execute command only if CANDIDATE exists"
+  (when (file-exists-p candidate)
+    ad-do-it))
+;; helm-buffers-list の詳細情報を非表示
+(setq helm-buffer-details-flag nil)
 
 ;; auto-complete
 (el-get-bundle auto-complete)
@@ -263,6 +270,20 @@
   (let ((contain-japanese (lambda (s) (string-match (rx (category japanese)) s))))
     (setq ad-return-value
           (remove-if contain-japanese ad-return-value))))
+
+;; Markdown
+(el-get-bundle markdown-mode)
+(autoload 'markdown-mode "markdown-mode"
+  "Major mode for editing Markdown files" t)
+(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+(autoload 'gfm-mode "gfm-mode"
+  "Major mode for editing GitHub Flavored Markdown files" t)
+(add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
+
+;; yaml
+(el-get-bundle yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.raml\\'" . yaml-mode))
 
 ;; JavaScript
 (el-get-bundle js2-mode)
@@ -299,7 +320,8 @@
      (add-hook 'go-mode-hook 'go-eldoc-setup)))
 
 ;; Python
-;; (el-get-bundle elpy)    ;; idomenu.elで503が返ってきたため、一旦コメントアウト
+;; el-get/recipes/idomenu.rps のtypeをemacsmirrorに変更すると動作する
+(el-get-bundle elpy)
 (elpy-enable)
 (add-hook 'python-mode-hook
           '(lambda ()
