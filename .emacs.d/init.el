@@ -188,6 +188,12 @@
 (setq comment-dwim-2--inline-comment-behavior 'reindent-comment)
 (global-set-key (kbd "M-;") 'comment-dwim-2)
 
+;; ペインの回転
+(el-get-bundle daichirata/emacs-rotate)
+(require 'rotate)
+(global-set-key (kbd "M-o") 'rotate-layout)
+(global-set-key (kbd "C-x C-o") 'rotate-window)
+
 ;; 検索・置換機能の拡張
 (el-get-bundle anzu)
 (require 'anzu)
