@@ -1,4 +1,5 @@
 atom-beautify@0.29.7
+atom-csv-markdown@1.0.2
 atomic-emacs@0.9.1
 autoclose-html@0.23.0
 autocomplete-json@1.9.1

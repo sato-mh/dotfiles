@@ -1,4 +1,7 @@
 "*":
+  "atom-beautify":
+    general:
+      _analyticsUserId: "be0b62ea-da40-4c10-a1c3-b6bb900b8e2e"
   autosave:
     enabled: true
   core:
