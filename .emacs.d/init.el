@@ -1,27 +1,31 @@
-;;
-;; 基本設定
-;;
+
+;;; package --- init.el ---
+;;; Code:
+
+
+;;; 
+;;; 基本設定
+;;;
 
 ;;; load-pathを追加する関数を定義
 (defun add-to-load-path (&rest paths)
   (let (path)
     (dolist (path paths paths)
-     (let ((default-directory (expand-file-name (concat user-emacs-directory path))))
+      (let ((default-directory (expand-file-name (concat user-emacs-directory path))))
         (add-to-list 'load-path default-directory)
-         (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
-             (normal-top-level-add-subdirs-to-load-path))))))
+        (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
+            (normal-top-level-add-subdirs-to-load-path))))))
 
 ;;; ディレクトリをサブディレクトリごとload-pathに追加
 (add-to-load-path "elpa" "elisp")
 
-;; el-get
+;;; el-getの設定
 (add-to-list 'load-path (locate-user-emacs-file "el-get"))
 (require 'el-get)
-
-;; el-getでダウンロードしたパッケージは ~/.emacs.d/el-get/packages に入るようにする
+;; el-getでダウンロードしたパッケージは ~/.emacs.d/elisp に入るようにする
 (setq el-get-dir (locate-user-emacs-file "~/.emacs.d/elisp"))
 
-;; 環境を日本語、UTF-8にする
+;;; 環境を日本語、UTF-8にする
 (set-language-environment "Japanese")
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
@@ -30,74 +34,72 @@
 (set-default-coding-systems 'utf-8)
 (prefer-coding-system 'utf-8)
 
-;; カラーテーマの設定
-;; (load-theme 'manoj-dark t)
+;;; カラーテーマの設定
 (el-get-bundle oneKelvinSmith/monokai-emacs)
 (load-theme 'monokai t)
 
-;; スタートアップメッセージを表示させない
+;;; スタートアップメッセージを表示させない
 (setq inhibit-startup-message t)
 
-;; バックアップファイルを作成させない
+;;; バックアップファイルを作成させない
 (setq make-backup-files nil)
 (setq auto-save-default nil)
 
-;; 終了時にオートセーブファイルを削除する
+;;; 終了時にオートセーブファイルを削除する
 (setq delete-auto-save-files t)
 
-;; タブにスペースを使用する
+;;; タブにスペースを使用する
 (setq-default tab-width 2)
 (setq-default indent-tabs-mode nil)
 
-;; インデント変更 
-(setq js-indent-level 2)
+;;; インデント変更 
 (setq-default c-basic-offset 2)
 
-;; 自動インデントを無効
+;;; 自動インデントを無効
 (electric-indent-mode 1)
 
-;; メニューバーを消す
+;;; "yes or no" の選択を "y or n" にする
+(fset 'yes-or-no-p 'y-or-n-p)
+
+;;; メニューバーを消す
 (menu-bar-mode -1)
 
-;; 列数を表示する
+;;; 列数を表示する
 (column-number-mode t)
 
-;; 行数を表示する
+;;; 行数を表示する
 (global-linum-mode t)
 
-;; カーソルの点滅をやめる
+;;; カーソルの点滅をやめる
 (blink-cursor-mode 0)
 
-;; カーソル行をハイライトする
+;;; カーソル行をハイライトする
 (global-hl-line-mode t)
 
-;; 対応する括弧を光らせる
+;;; 対応する括弧を光らせる
 (show-paren-mode 1)
 
-;; ウィンドウ内に収まらないときだけ、カッコ内も光らせる
+;;; ウィンドウ内に収まらないときだけ、カッコ内も光らせる
 (setq show-paren-style 'mixed)
 (set-face-background 'show-paren-match-face "grey")
 (set-face-foreground 'show-paren-match-face "black")
 
-;; スクロールは１行ごとに
+;;; スクロールは１行ごとに
 (setq scroll-conservatively 1)
 
-;; "yes or no" の選択を "y or n" にする
-(fset 'yes-or-no-p 'y-or-n-p)
-
-;; 対応する括弧を補完
+;;; 対応する括弧を補完
 (electric-pair-mode t)
 (add-to-list 'electric-pair-pairs '(?{ . ?}))
 (add-to-list 'electric-pair-pairs '(?' . ?'))
 
-;; クリップボードの共有
+;;; クリップボードの共有
 (setq x-select-enable-clipboard t)
 
-;; バッファの自動更新
+;;; バッファの自動更新
 (global-auto-revert-mode 1)
 (setq auto-revert-check-vc-info t)
 
-;; 選択範囲をisearch
+;;; 選択範囲をisearch
 (defadvice isearch-mode (around isearch-mode-default-string (forward &optional regexp op-fun recursive-edit word-p) activate)
   (if (and transient-mark-mode mark-active (not (eq (mark) (point))))
       (progn
@@ -110,9 +112,14 @@
           (isearch-repeat-forward)))
     ad-do-it))
 
-;;
-;; dired設定
-;;
+;;; 再起動時に色々復元
+(custom-set-variables '(desktop-save-mode t))
+(custom-set-faces)
+
+
+;;;
+;;; dired設定
+;;;
 
 (require 'dired-x)
 ;; dired-find-alternate-file の有効化
@@ -122,79 +129,76 @@
 (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
 
 
-;;
-;; キーバインド設定
-;;
+;;;
+;;; キーバインド設定
+;;;
 
-;; 指定行にジャンプする
+;;; 指定行にジャンプする
 (global-set-key "\C-xj" 'goto-line)
 
-;; 前の単語を削除
+;;; 前の単語を削除
 (global-set-key "\M-h" 'backward-kill-word)
 
-;; 単語選択
+;;; 単語選択
 (global-set-key "\M-n"'mark-word)
 
-;; 段落選択
+;;; 段落選択
 (global-set-key "\M-p"'mark-paragraph)
 
-;; ペインの移動
+;;; ペインの移動
 (global-set-key (kbd "C-c C-b")  'windmove-left)
 (global-set-key (kbd "C-c C-n")  'windmove-down)
 (global-set-key (kbd "C-c C-p")    'windmove-up)
 (global-set-key (kbd "C-c C-f") 'windmove-right)
 
-;; バッファの手動更新
+;;; バッファの手動更新
 (global-set-key [f5] 'revert-buffer)
 
-;; undo
-;; (keyboard-translate ?\C-u ?\C-/)
-;; (global-set-key [?\C-\-] 'undo)
-
-;; コメントアウト
-;; (global-set-key (kbd "M-;") 'comment-or-uncomment-region)
-;; (keyboard-translate ?\C-t ?\M-;)
-;; (global-set-key [?\C-\/] 'comment-or-uncomment-region)
-
-;; Macのキーバインドを使う
+;;; Macのキーバインドを使う
 ;; (mac-key-mode 1)
 
-;; Macのoptionをメタキーにする
+;;; Macのoptionをメタキーにする
 (setq mac-option-modifier 'meta)
 
 
-;;
-;; el-getを使ったパッケージ設定
-;;
+;;;
+;;; el-getを使ったパッケージ設定
+;;;
 
-;; shellの環境変数引継ぎ
+;;; shellの環境変数引継ぎ
 (el-get-bundle exec-path-from-shell)
 
-;; 同じ単語をハイライト
+;;; 同じ単語をハイライト
 (el-get-bundle highlight-symbol)
 (require 'highlight-symbol)
 (setq highlight-symbol-idle-delay 0)
 (add-hook 'python-mode-hook 'highlight-symbol-mode)
+(add-hook 'yaml-mode 'highlight-symbol-mode)
+(add-hook 'emacs-lisp-mode 'highlight-symbol-mode)
+(add-hook 'js2-jsx-mode 'highlight-symbol-mode)
 
-;; インデントのハイライト
+;;: インデントのハイライト
 (el-get-bundle highlight-indentation)
 (require 'highlight-indentation)
-(set-face-background 'highlight-indentation-face "#40483e")
+(set-face-background 'highlight-indentation-face "#40483e")  ; 色の指定
 (add-hook 'python-mode-hook 'highlight-indentation-current-column-mode)
+(add-hook 'yaml-mode-hook 'highlight-indentation-current-column-mode)
+(add-hook 'emacs-lisp-mode-hook 'highlight-indentation-current-column-mode)
+(add-hook 'js2-jsx-mode 'highlight-indentation-current-column-mode)
 
-;; コメントアウト
+;;; コメントアウト
 (el-get-bundle comment-dwim-2)
 (require 'comment-dwim-2)
 (setq comment-dwim-2--inline-comment-behavior 'reindent-comment)
 (global-set-key (kbd "M-;") 'comment-dwim-2)
 
-;; ペインの回転
+;;; ペインの回転
 (el-get-bundle daichirata/emacs-rotate)
 (require 'rotate)
 (global-set-key (kbd "M-o") 'rotate-layout)
 (global-set-key (kbd "C-x C-o") 'rotate-window)
 
-;; 検索・置換機能の拡張
+;;; 検索・置換機能の拡張
 (el-get-bundle anzu)
 (require 'anzu)
 (global-anzu-mode +1)
@@ -203,18 +207,18 @@
 (global-set-key (kbd "C-c r") 'anzu-query-replace)
 (global-set-key (kbd "C-c R") 'anzu-query-replace-regexp)
 
-;; 選択範囲を拡張
+;;; 選択範囲を拡張
 (el-get-bundle expand-region)
 (require 'expand-region)
-(global-set-key (kbd "C-\]") 'er/expand-region)      ;; リージョンを広げる
-(global-set-key (kbd "C-M-\]") 'er/contract-region)  ;; リージョンを狭める
-(global-set-key (kbd "C-M-@") 'er/contract-region)   ;; リージョンを狭める
+(global-set-key (kbd "C-\]") 'er/expand-region)      ; リージョンを広げる
+(global-set-key (kbd "C-M-\]") 'er/contract-region)  ; リージョンを狭める
+(global-set-key (kbd "C-M-@") 'er/contract-region)   ; リージョンを狭める
 
-;; 複数カーソル
+;;; 複数カーソル
 (el-get-bundle multiple-cursors)
 (require 'multiple-cursors)
 
-;; prefixによる連続操作のキーバインド設定
+;;; prefixによる連続操作のキーバインド設定
 (el-get-bundle smartrep)
 (require 'smartrep)
 (global-set-key "\C-t" nil)
@@ -228,9 +232,9 @@
                        ("*"   . 'mc/mark-all-like-this)
                        ("C-@" . 'er/expand-region)))
 
-;; helm
-(el-get-bundle helm)            ;; helm本体
-(el-get-bundle helm-descbinds)  ;; helmでキーバインドを表示
+;;; helm
+(el-get-bundle helm)            ; helm本体
+(el-get-bundle helm-descbinds)  ; helmでキーバインドを表示
 (require 'helm-config)
 (require 'helm-descbinds)
 (helm-mode 1)
@@ -242,12 +246,11 @@
 (global-set-key (kbd "M-y") 'helm-show-kill-ring)
 (global-set-key (kbd "M-x") 'helm-M-x)
 (define-key global-map (kbd "C-c i")   'helm-imenu)
-(global-set-key (kbd "C-c h") 'helm-mini)
 (define-key global-map (kbd "C-x C-f") 'helm-find-files)
 (define-key global-map (kbd "C-x b") 'helm-for-files)
 (define-key global-map (kbd "C-c g") 'helm-grep-do-git-grep)
 ;; helm-descbinds用キーバインド
-(global-set-key (kbd "C-c b") 'helm-descbinds)
+(global-set-key (kbd "C-c k") 'helm-descbinds)
 ;; TABでnew bufferが作成しない(ファイルがない時は何もしない)
 (defadvice helm-ff-kill-or-find-buffer-fname (around execute-only-if-exist activate)
   "Execute command only if CANDIDATE exists"
@@ -256,20 +259,20 @@
 ;; helm-buffers-list の詳細情報を非表示
 (setq helm-buffer-details-flag nil)
 
-;; auto-complete
+;;; auto-complete
 (el-get-bundle auto-complete)
 (require 'auto-complete)
 (require 'auto-complete-config)
 (ac-config-default)
-(add-to-list 'ac-modes 'text-mode)         ;; text-modeでも自動的に有効にする
-(add-to-list 'ac-modes 'fundamental-mode)  ;; fundamental-mode
+(add-to-list 'ac-modes 'text-mode)
+(add-to-list 'ac-modes 'fundamental-mode)
 (add-to-list 'ac-modes 'org-mode)
 (add-to-list 'ac-modes 'yatex-mode)
 (add-to-list 'ac-modes 'js2-jsx-mode)
 (ac-set-trigger-key "TAB")
-(setq ac-use-menu-map t)       ;; 補完メニュー表示時にC-n/C-pで補完候補選択
-(setq ac-use-fuzzy t)          ;; 曖昧マッチ
-(setq ac-ignore-case `smart)    ;; 大文字小文字を区別しない
+(setq ac-use-menu-map t)       ; 補完メニュー表示時にC-n/C-pで補完候補選択
+(setq ac-use-fuzzy t)          ; 曖昧マッチ
+(setq ac-ignore-case `smart)   ; 大文字小文字を区別しない
 ;; auto-complete の候補に日本語を含む単語が含まれないようにする
 ;; http://d.hatena.ne.jp/IMAKADO/20090813/1250130343
 (defadvice ac-word-candidates (after remove-word-contain-japanese activate)
@@ -277,27 +280,39 @@
     (setq ad-return-value
           (remove-if contain-japanese ad-return-value))))
 
-;; Markdown
+;;; flycheck (シンタックスチェック)
+(el-get-bundle flycheck)
+(require 'flycheck)
+(global-flycheck-mode)
+;; 保存時に自動チェック
+(setq flycheck-check-syntax-automatically '(mode-enabled save))
+;; キーバインド
+(define-key global-map (kbd "M-n") 'flycheck-next-error)
+(define-key global-map (kbd "M-p") 'flycheck-previous-error)
+(define-key global-map (kbd "M-l") 'flycheck-list-errors)
+
+;;; markdown
 (el-get-bundle markdown-mode)
 (autoload 'markdown-mode "markdown-mode"
-  "Major mode for editing Markdown files" t)
+  "major mode for editing Markdown files" t)
 (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
 (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 (autoload 'gfm-mode "gfm-mode"
   "Major mode for editing GitHub Flavored Markdown files" t)
 (add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
 
-;; yaml
+;;; yaml
 (el-get-bundle yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.raml\\'" . yaml-mode))
 
-;; JavaScript
+;;; JavaScript
 (el-get-bundle js2-mode)
 (autoload 'js2-mode "js2-mode" nil t)
 ;; (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
 (add-to-list 'auto-mode-alist '("\\.js$" . js2-jsx-mode))
-
-;; Golang
+(setq js-indent-level 2)    ; jsのインデント設定
+ 
+;;; Golang
 (el-get-bundle go-mode)
 (el-get-bundle go-autocomplete)
 (el-get-bundle go-eldoc)
@@ -325,27 +340,54 @@
      (require 'go-autocomplete)
      (add-hook 'go-mode-hook 'go-eldoc-setup)))
 
-;; Python
-;; el-get/recipes/idomenu.rps のtypeをemacsmirrorに変更すると動作する
-(el-get-bundle elpy)
-(elpy-enable)
+;;; Python
+(el-get-bundle jedi)
+(el-get-bundle py-autopep8)
+(el-get-bundle yasnippet)
+
 (add-hook 'python-mode-hook
-          '(lambda ()
-             (setq indent-tabs-mode nil);;tabの幅を変える
-             (setq indent-level 4)
-             (setq python-indent 4)
-             (setq tab-width 4)
-             (define-key company-active-map (kbd "\C-n") 'company-select-next)
-             (define-key company-active-map (kbd "\C-p") 'company-select-previous)
-             (define-key company-active-map (kbd "\C-d") 'company-show-doc-buffer)
-             (define-key company-active-map (kbd "<tab>") 'company-complete)
-             (auto-complete-mode -1)
-             ;; 保存時にバッファ全体を自動整形する
-             (el-get-bundle py-autopep8)
+          '(lambda()
+             ;; オートコンプリート
+             (require 'jedi)
+             (jedi:setup)
+             ;; (jedi:ac-setup)
+             (setq jedi:complete-on-dot t)
+             (local-set-key (kbd "M-TAB") 'jedi:complete)
+             (define-key python-mode-map "\C-cd" 'jedi:show-doc)
+
+             ;; 補完候補をjediのもののみにする
+             ;; (setq ac-sources
+             ;;       (delete 'ac-source-words-in-same-mode-buffers ac-sources))
+             ;; (add-to-list 'ac-sources 'ac-source-filename)
+             ;; (add-to-list 'ac-sources 'ac-source-jedi-direct)  
+
+             ;; 関数定義ジャンプ
+             (defvar jedi:goto-stack '())
+             (defun jedi:jump-to-definition ()
+               (interactive)
+               (add-to-list 'jedi:goto-stack
+                            (list (buffer-name) (point)))
+               (jedi:goto-definition))
+             (defun jedi:jump-back ()
+               (interactive)
+               (let ((p (pop jedi:goto-stack)))
+                 (if p (progn
+                        (switch-to-buffer (nth 0 p))
+                        (goto-char (nth 1 p))))))
+             (define-key python-mode-map "\C-cj" 'jedi:jump-to-definition)
+             (define-key python-mode-map "\C-cp" 'jedi:jump-back)
+             (define-key python-mode-map "\C-cr" 'helm-jedi-related-names)
+
+             ;; PEP8のチェック
              (require 'py-autopep8)
-             ;; (add-hook 'before-save-hook 'delete-trailing-whitespace)
-             (add-to-list 'write-file-functions 'delete-trailing-whitespace)
+             (py-autopep8-enable-on-save)
              (add-hook 'before-save-hook 'py-autopep8-before-save)
              (setq py-autopep8-options '("--max-line-length=160"))
              (define-key python-mode-map (kbd "C-c f") 'py-autopep8)
+             
+             ;; スニペット
+             (require 'yasnippet)
+             (yas-global-mode 1)
              ))
+
+;;; init.el ends here
