@@ -1,0 +1,80 @@
+#!/bin/bash
+# This is the script to setup my environment
+# Usage: bash setup.sh
+
+# Select versions
+readonly EMACS_VER=emacs-24.5
+readonly MINICONDA_VER=miniconda3-4.0.5
+readonly NODE_VER=v5.7.1
+
+
+#
+# Setup fundamental Environment
+#
+
+# Create symbolic link
+WORK_DIR=$(echo $(cd $(dirname $0) && pwd))
+ln -sf $WORK_DIR/.bashrc ~/.bashrc
+ln -sf $WORK_DIR/.flake8 ~/.flake8
+ln -sf $WORK_DIR/.tmux.conf ~/.tmux.conf
+cp -r $WORK_DIR/.emacs.d ~/.emacs.d
+ln -sf $WORK_DIR/.emacs.d/init.d ~/.emacs.d/init.d
+
+# Install emacs
+sudo apt-get install -y gcc make ncurses-dev libjpeg8-dev libgif-dev libtiff4-dev libncurses5-dev libgnutls-dev libselinux1-dev
+
+cd /usr/local/src
+wget http://ftp.jaist.ac.jp/pub/GNU/emacs/$EMACS_VER.tar.gz
+tar -zxf $EMACS_VER.tar.gz
+cd $EMACS_VER
+./configure && make
+sudo make install
+
+# Git clone el-get
+cd ~/.emacs.d
+git clone https://github.com/dimitri/el-get.git
+    
+# Install tmux
+sudo apt-get -y build-dep ncurses-dev
+cd /usr/local/src
+git clone https://github.com/tmux/tmux.git
+cd tmux
+sh autogen.sh
+./configure && make
+sudo make install
+
+# Install others
+sudo apt-get -y tig
+
+# Set timezone
+timedatectl set-timezone Asia/Tokyo
+
+
+#
+# Setup Python Environment
+#
+
+# Install pyenv
+curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
+source ~/.bashrc
+
+# Install miniconda
+pyenv install $MINICONDA_VER
+pyenv global $MINICONDA_VER
+
+# Install required python library
+pip install flake8 autopep8 ipython #jedi
+
+
+#
+# Setup Node Environment
+#
+
+# Install nvm
+git clone git://github.com/creationix/nvm.git ~/.nvm
+source ~/.bashrc
+
+# Install node
+nvm install $NODE_VER
+npm update -g npm
+
