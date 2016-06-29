@@ -22,39 +22,40 @@ cp -r $WORK_DIR/.emacs.d ~/.emacs.d
 ln -sf $WORK_DIR/.emacs.d/init.d ~/.emacs.d/init.d
 
 # Set host name
-sudo sh -c "echo $HOST_NAME > /etc/hostname"
+sudo -E sh -c "echo $HOST_NAME > /etc/hostname"
 
 # Set timezone
-timedatectl set-timezone Asia/Tokyo
+sudo -E timedatectl set-timezone Asia/Tokyo
 
 # Setting for git
 git config --global credential.helper cache
 git config --global core.editor emacs
 
 # Install emacs
-sudo aptitude install -y gcc make ncurses-dev libjpeg8-dev libgif-dev libtiff4-dev libncurses5-dev libgnutls-dev libselinux1-dev
-cd /usr/local/src
+sudo -E aptitude install -y gcc make ncurses-dev libjpeg8-dev libgif-dev libtiff4-dev libncurses5-dev libgnutls-dev libselinux1-dev
+mkdir ~/dlp
+cd ~/dlp
 wget http://ftp.jaist.ac.jp/pub/GNU/emacs/$EMACS_VER.tar.gz
 tar -zxf $EMACS_VER.tar.gz
 cd $EMACS_VER
 ./configure && make
-sudo make install
+sudo -E make install
 
 # Git clone el-get
 cd ~/.emacs.d
 git clone https://github.com/dimitri/el-get.git
     
 # Install tmux
-sudo aptitude -y build-dep ncurses-dev
-cd /usr/local/src
+sudo -E aptitude -y build-dep ncurses-dev
+cd ~/dlp
 git clone https://github.com/tmux/tmux.git
 cd tmux
 sh autogen.sh
 ./configure && make
-sudo make install
+sudo -E make install
 
 # Install others
-sudo aptitude -y tig
+sudo -E aptitude -y tig
 
 
 #
