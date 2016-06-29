@@ -2,7 +2,8 @@
 # This is the script to setup my environment
 # Usage: bash setup.sh
 
-# Select versions
+# Specified variables
+readonly HOST_NAME=ubuntu14
 readonly EMACS_VER=emacs-24.5
 readonly MINICONDA_VER=miniconda3-4.0.5
 readonly NODE_VER=v5.7.1
@@ -20,9 +21,18 @@ ln -sf $WORK_DIR/.tmux.conf ~/.tmux.conf
 cp -r $WORK_DIR/.emacs.d ~/.emacs.d
 ln -sf $WORK_DIR/.emacs.d/init.d ~/.emacs.d/init.d
 
-# Install emacs
-sudo apt-get install -y gcc make ncurses-dev libjpeg8-dev libgif-dev libtiff4-dev libncurses5-dev libgnutls-dev libselinux1-dev
+# Set host name
+sudo sh -c "echo $HOST_NAME > /etc/hostname"
 
+# Set timezone
+timedatectl set-timezone Asia/Tokyo
+
+# Setting for git
+git config --global credential.helper cache
+git config --global core.editor emacs
+
+# Install emacs
+sudo aptitude install -y gcc make ncurses-dev libjpeg8-dev libgif-dev libtiff4-dev libncurses5-dev libgnutls-dev libselinux1-dev
 cd /usr/local/src
 wget http://ftp.jaist.ac.jp/pub/GNU/emacs/$EMACS_VER.tar.gz
 tar -zxf $EMACS_VER.tar.gz
@@ -35,7 +45,7 @@ cd ~/.emacs.d
 git clone https://github.com/dimitri/el-get.git
     
 # Install tmux
-sudo apt-get -y build-dep ncurses-dev
+sudo aptitude -y build-dep ncurses-dev
 cd /usr/local/src
 git clone https://github.com/tmux/tmux.git
 cd tmux
@@ -44,10 +54,7 @@ sh autogen.sh
 sudo make install
 
 # Install others
-sudo apt-get -y tig
-
-# Set timezone
-timedatectl set-timezone Asia/Tokyo
+sudo aptitude -y tig
 
 
 #
