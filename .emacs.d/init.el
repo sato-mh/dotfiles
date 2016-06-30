@@ -260,25 +260,26 @@
 (setq helm-buffer-details-flag nil)
 
 ;;; auto-complete
-(el-get-bundle auto-complete)
-(require 'auto-complete)
-(require 'auto-complete-config)
-(ac-config-default)
-(add-to-list 'ac-modes 'text-mode)
-(add-to-list 'ac-modes 'fundamental-mode)
-(add-to-list 'ac-modes 'org-mode)
-(add-to-list 'ac-modes 'yatex-mode)
-(add-to-list 'ac-modes 'js2-jsx-mode)
-(ac-set-trigger-key "TAB")
-(setq ac-use-menu-map t)       ; 補完メニュー表示時にC-n/C-pで補完候補選択
-(setq ac-use-fuzzy t)          ; 曖昧マッチ
-(setq ac-ignore-case `smart)   ; 大文字小文字を区別しない
-;; auto-complete の候補に日本語を含む単語が含まれないようにする
-;; http://d.hatena.ne.jp/IMAKADO/20090813/1250130343
-(defadvice ac-word-candidates (after remove-word-contain-japanese activate)
-  (let ((contain-japanese (lambda (s) (string-match (rx (category japanese)) s))))
-    (setq ad-return-value
-          (remove-if contain-japanese ad-return-value))))
+;; (el-get-bundle auto-complete)
+;; (require 'auto-complete)
+;; (require 'auto-complete-config)
+;; (ac-config-default)
+;; (add-to-list 'ac-modes 'text-mode)
+;; (add-to-list 'ac-modes 'fundamental-mode)
+;; (add-to-list 'ac-modes 'org-mode)
+;; (add-to-list 'ac-modes 'yatex-mode)
+;; (add-to-list 'ac-modes 'js2-jsx-mode)
+;; (ac-set-trigger-key "TAB")
+;; (define-key global-map (kbd "M-TAB") 'auto-complete)
+;; (setq ac-use-menu-map t)       ; 補完メニュー表示時にC-n/C-pで補完候補選択
+;; (setq ac-use-fuzzy t)          ; 曖昧マッチ
+;; (setq ac-ignore-case `smart)   ; 大文字小文字を区別しない
+;; ;; auto-complete の候補に日本語を含む単語が含まれないようにする
+;; ;; http://d.hatena.ne.jp/IMAKADO/20090813/1250130343
+;; (defadvice ac-word-candidates (after remove-word-contain-japanese activate)
+;;   (let ((contain-japanese (lambda (s) (string-match (rx (category japanese)) s))))
+;;     (setq ad-return-value
+;;           (remove-if contain-japanese ad-return-value))))
 
 ;;; flycheck (シンタックスチェック)
 (el-get-bundle flycheck)
@@ -340,19 +341,60 @@
      (require 'go-autocomplete)
      (add-hook 'go-mode-hook 'go-eldoc-setup)))
 
+
+;;; company (オートコンプリート)
+(el-get-bundle company-mode)
+(el-get-bundle company-quickhelp)
+(require 'company)
+(require 'company-quickhelp)
+(global-company-mode) ; 全バッファで有効にする
+(setq company-idle-delay 0) ; デフォルトは0.5
+(setq company-minimum-prefix-length 2) ; デフォルトは4
+(setq company-selection-wrap-around t) ; 候補の一番下でさらに下に行こうとすると一番上に戻る
+
+(company-quickhelp-mode 1)
+(global-set-key (kbd "C-M-i") 'company-complete)
+(define-key company-active-map (kbd "M-n") nil)
+(define-key company-active-map (kbd "M-p") nil)
+
+;; C-n, C-pで補完候補を次/前の候補を選択
+(define-key company-active-map (kbd "C-n") 'company-select-next)
+(define-key company-active-map (kbd "C-p") 'company-select-previous)
+(define-key company-search-map (kbd "C-n") 'company-select-next)
+(define-key company-search-map (kbd "C-p") 'company-select-previous)
+
+;; C-sで絞り込む
+(define-key company-active-map (kbd "C-s") 'company-filter-candidates)
+
+;; TABで候補を設定
+(define-key company-active-map (kbd "C-i") 'company-complete-selection)
+
+;; 各種メジャーモードでも C-M-iで company-modeの補完を使う
+(define-key emacs-lisp-mode-map (kbd "C-M-i") 'company-complete)
+
+
 ;;; Python
-(el-get-bundle jedi)
+;; (el-get-bundle jedi)
+(el-get-bundle company-jedi)
 (el-get-bundle py-autopep8)
 (el-get-bundle yasnippet)
 
 (add-hook 'python-mode-hook
           '(lambda()
-             ;; オートコンプリート
-             (require 'jedi)
-             (jedi:setup)
+             ;; jedi (auto-complete用)
+             ;; (require 'jedi)
+             ;; (jedi:setup)
              ;; (jedi:ac-setup)
+             ;; (setq jedi:complete-on-dot t)
+             ;; (local-set-key (kbd "M-TAB") 'jedi:complete)
+             ;; (define-key python-mode-map "\C-cd" 'jedi:show-doc)
+
+             ;; company-jedi (company用)
+             (require 'jedi-core)
              (setq jedi:complete-on-dot t)
-             (local-set-key (kbd "M-TAB") 'jedi:complete)
+             (setq jedi:use-shortcuts t)
+             (add-hook 'python-mode-hook 'jedi:setup)
+             (add-to-list 'company-backends 'company-jedi) ; backendに追加
              (define-key python-mode-map "\C-cd" 'jedi:show-doc)
 
              ;; 補完候補をjediのもののみにする
@@ -362,21 +404,21 @@
              ;; (add-to-list 'ac-sources 'ac-source-jedi-direct)  
 
              ;; 関数定義ジャンプ
-             (defvar jedi:goto-stack '())
-             (defun jedi:jump-to-definition ()
-               (interactive)
-               (add-to-list 'jedi:goto-stack
-                            (list (buffer-name) (point)))
-               (jedi:goto-definition))
-             (defun jedi:jump-back ()
-               (interactive)
-               (let ((p (pop jedi:goto-stack)))
-                 (if p (progn
-                        (switch-to-buffer (nth 0 p))
-                        (goto-char (nth 1 p))))))
-             (define-key python-mode-map "\C-cj" 'jedi:jump-to-definition)
-             (define-key python-mode-map "\C-cp" 'jedi:jump-back)
-             (define-key python-mode-map "\C-cr" 'helm-jedi-related-names)
+             ;; (defvar jedi:goto-stack '())
+             ;; (defun jedi:jump-to-definition ()
+             ;;   (interactive)
+             ;;   (add-to-list 'jedi:goto-stack
+             ;;                (list (buffer-name) (point)))
+             ;;   (jedi:goto-definition))
+             ;; (defun jedi:jump-back ()
+             ;;   (interactive)
+             ;;   (let ((p (pop jedi:goto-stack)))
+             ;;     (if p (progn
+             ;;            (switch-to-buffer (nth 0 p))
+             ;;            (goto-char (nth 1 p))))))
+             ;; (define-key python-mode-map "\C-cj" 'jedi:jump-to-definition)
+             ;; (define-key python-mode-map "\C-cp" 'jedi:jump-back)
+             ;; (define-key python-mode-map "\C-cr" 'helm-jedi-related-names)
 
              ;; PEP8のチェック
              (require 'py-autopep8)
