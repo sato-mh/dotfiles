@@ -113,8 +113,8 @@
     ad-do-it))
 
 ;;; 再起動時に色々復元
-(custom-set-variables '(desktop-save-mode t))
-(custom-set-faces)
+;; (custom-set-variables '(desktop-save-mode t))
+;; (custom-set-faces)
 
 
 ;;;
@@ -270,6 +270,7 @@
 (add-to-list 'ac-modes 'yatex-mode)
 (add-to-list 'ac-modes 'js2-jsx-mode)
 (ac-set-trigger-key "TAB")
+(define-key global-map (kbd "M-TAB") 'auto-complete)
 (setq ac-use-menu-map t)       ; 補完メニュー表示時にC-n/C-pで補完候補選択
 (setq ac-use-fuzzy t)          ; 曖昧マッチ
 (setq ac-ignore-case `smart)   ; 大文字小文字を区別しない
@@ -352,7 +353,7 @@
              (jedi:setup)
              ;; (jedi:ac-setup)
              (setq jedi:complete-on-dot t)
-             (local-set-key (kbd "M-TAB") 'jedi:complete)
+             ;; (local-set-key (kbd "M-TAB") 'jedi:complete)
              (define-key python-mode-map "\C-cd" 'jedi:show-doc)
 
              ;; 補完候補をjediのもののみにする
