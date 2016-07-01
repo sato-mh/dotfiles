@@ -64,6 +64,11 @@
 ;;; メニューバーを消す
 (menu-bar-mode -1)
 
+;;; 行番号を表示する
+(global-linum-mode t)
+;; 行番号表示箇所に3桁分の領域を確保
+;; (setq linum-format "%3d ")
+
 ;;; 列数を表示する
 (column-number-mode t)
 
@@ -116,15 +121,10 @@
 (custom-set-variables '(desktop-save-mode t))
 (custom-set-faces)
 
-
-;;;
 ;;; dired設定
-;;;
-
 (require 'dired-x)
 ;; dired-find-alternate-file の有効化
 (put 'dired-find-alternate-file 'disabled nil)
-
 ;; Enterを押した際に同じバッファでファイルを開く
 (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
 
@@ -159,6 +159,7 @@
 
 ;;; Macのoptionをメタキーにする
 (setq mac-option-modifier 'meta)
+
 
 
 ;;;
@@ -232,12 +233,14 @@
                        ("*"   . 'mc/mark-all-like-this)
                        ("C-@" . 'er/expand-region)))
 
+
 ;;; helm
 (el-get-bundle helm)            ; helm本体
 (el-get-bundle helm-descbinds)  ; helmでキーバインドを表示
 (require 'helm-config)
 (require 'helm-descbinds)
 (helm-mode 1)
+
 ;; helm用キーバインド
 (define-key helm-map (kbd "C-h") 'delete-backward-char)
 (define-key helm-find-files-map (kbd "C-h") 'delete-backward-char)
@@ -249,48 +252,69 @@
 (define-key global-map (kbd "C-x C-f") 'helm-find-files)
 (define-key global-map (kbd "C-x b") 'helm-for-files)
 (define-key global-map (kbd "C-c g") 'helm-grep-do-git-grep)
+
 ;; helm-descbinds用キーバインド
 (global-set-key (kbd "C-c k") 'helm-descbinds)
+
 ;; TABでnew bufferが作成しない(ファイルがない時は何もしない)
 (defadvice helm-ff-kill-or-find-buffer-fname (around execute-only-if-exist activate)
   "Execute command only if CANDIDATE exists"
   (when (file-exists-p candidate)
     ad-do-it))
+
 ;; helm-buffers-list の詳細情報を非表示
 (setq helm-buffer-details-flag nil)
 
-;;; auto-complete
-;; (el-get-bundle auto-complete)
-;; (require 'auto-complete)
-;; (require 'auto-complete-config)
-;; (ac-config-default)
-;; (add-to-list 'ac-modes 'text-mode)
-;; (add-to-list 'ac-modes 'fundamental-mode)
-;; (add-to-list 'ac-modes 'org-mode)
-;; (add-to-list 'ac-modes 'yatex-mode)
-;; (add-to-list 'ac-modes 'js2-jsx-mode)
-;; (ac-set-trigger-key "TAB")
-;; (define-key global-map (kbd "M-TAB") 'auto-complete)
-;; (setq ac-use-menu-map t)       ; 補完メニュー表示時にC-n/C-pで補完候補選択
-;; (setq ac-use-fuzzy t)          ; 曖昧マッチ
-;; (setq ac-ignore-case `smart)   ; 大文字小文字を区別しない
-;; ;; auto-complete の候補に日本語を含む単語が含まれないようにする
-;; ;; http://d.hatena.ne.jp/IMAKADO/20090813/1250130343
-;; (defadvice ac-word-candidates (after remove-word-contain-japanese activate)
-;;   (let ((contain-japanese (lambda (s) (string-match (rx (category japanese)) s))))
-;;     (setq ad-return-value
-;;           (remove-if contain-japanese ad-return-value))))
+
+;;; company (オートコンプリート)
+(el-get-bundle company-mode)
+(require 'company)
+
+;; 基本設定
+(global-company-mode)                   ; 全バッファでcompanyを有効にする
+(setq company-idle-delay 0)             ; デフォルトは0.5
+(setq company-minimum-prefix-length 2)  ; デフォルトは4
+(setq company-selection-wrap-around t)  ; 一番下の候補で下を押すと最初に戻る
+
+;; 不要なキーバインドを解除
+(define-key company-active-map (kbd "M-n") nil)
+(define-key company-active-map (kbd "M-p") nil)
+
+;; C-M-i で手動補完
+(global-set-key (kbd "C-M-i") 'company-complete)
+
+;; 関数のドキュメントをミニバッファに表示
+(define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
+
+;; C-n, C-pで補完候補を次/前の候補を選択
+(define-key company-active-map (kbd "C-n") 'company-select-next)
+(define-key company-active-map (kbd "C-p") 'company-select-previous)
+(define-key company-search-map (kbd "C-n") 'company-select-next)
+(define-key company-search-map (kbd "C-p") 'company-select-previous)
+
+;;; 候補が1つならばtabで補完、複数候補があればtabで次の候補へ行く
+(define-key company-active-map (kbd "C-i") 'company-complete-common-or-cycle)
+
+;; 関数のドキュメントをポップアップ表示(terminal上では動作しない)
+;; (el-get-bundle company-quickhelp)
+;; (el-get-bundle pos-tip)
+;; (require 'company-quickhelp)
+;; (company-quickhelp-mode 1)
+
 
 ;;; flycheck (シンタックスチェック)
 (el-get-bundle flycheck)
 (require 'flycheck)
 (global-flycheck-mode)
+
 ;; 保存時に自動チェック
 (setq flycheck-check-syntax-automatically '(mode-enabled save))
+
 ;; キーバインド
 (define-key global-map (kbd "M-n") 'flycheck-next-error)
 (define-key global-map (kbd "M-p") 'flycheck-previous-error)
 (define-key global-map (kbd "M-l") 'flycheck-list-errors)
+
 
 ;;; markdown
 (el-get-bundle markdown-mode)
@@ -302,17 +326,21 @@
   "Major mode for editing GitHub Flavored Markdown files" t)
 (add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
 
+
 ;;; yaml
 (el-get-bundle yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.raml\\'" . yaml-mode))
 
+
 ;;; JavaScript
 (el-get-bundle js2-mode)
 (autoload 'js2-mode "js2-mode" nil t)
+
 ;; (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
 (add-to-list 'auto-mode-alist '("\\.js$" . js2-jsx-mode))
 (setq js-indent-level 2)    ; jsのインデント設定
- 
+
+
 ;;; Golang
 (el-get-bundle go-mode)
 (el-get-bundle go-autocomplete)
@@ -342,37 +370,6 @@
      (add-hook 'go-mode-hook 'go-eldoc-setup)))
 
 
-;;; company (オートコンプリート)
-(el-get-bundle company-mode)
-(el-get-bundle company-quickhelp)
-(require 'company)
-(require 'company-quickhelp)
-(global-company-mode) ; 全バッファで有効にする
-(setq company-idle-delay 0) ; デフォルトは0.5
-(setq company-minimum-prefix-length 2) ; デフォルトは4
-(setq company-selection-wrap-around t) ; 候補の一番下でさらに下に行こうとすると一番上に戻る
-
-(company-quickhelp-mode 1)
-(global-set-key (kbd "C-M-i") 'company-complete)
-(define-key company-active-map (kbd "M-n") nil)
-(define-key company-active-map (kbd "M-p") nil)
-
-;; C-n, C-pで補完候補を次/前の候補を選択
-(define-key company-active-map (kbd "C-n") 'company-select-next)
-(define-key company-active-map (kbd "C-p") 'company-select-previous)
-(define-key company-search-map (kbd "C-n") 'company-select-next)
-(define-key company-search-map (kbd "C-p") 'company-select-previous)
-
-;; C-sで絞り込む
-(define-key company-active-map (kbd "C-s") 'company-filter-candidates)
-
-;; TABで候補を設定
-(define-key company-active-map (kbd "C-i") 'company-complete-selection)
-
-;; 各種メジャーモードでも C-M-iで company-modeの補完を使う
-(define-key emacs-lisp-mode-map (kbd "C-M-i") 'company-complete)
-
-
 ;;; Python
 ;; (el-get-bundle jedi)
 (el-get-bundle company-jedi)
@@ -381,51 +378,39 @@
 
 (add-hook 'python-mode-hook
           '(lambda()
-             ;; jedi (auto-complete用)
-             ;; (require 'jedi)
-             ;; (jedi:setup)
-             ;; (jedi:ac-setup)
-             ;; (setq jedi:complete-on-dot t)
-             ;; (local-set-key (kbd "M-TAB") 'jedi:complete)
-             ;; (define-key python-mode-map "\C-cd" 'jedi:show-doc)
-
-             ;; company-jedi (company用)
+             ;; 関数補完 (company-jedi)
              (require 'jedi-core)
+             (jedi:setup)
              (setq jedi:complete-on-dot t)
              (setq jedi:use-shortcuts t)
-             (add-hook 'python-mode-hook 'jedi:setup)
              (add-to-list 'company-backends 'company-jedi) ; backendに追加
              (define-key python-mode-map "\C-cd" 'jedi:show-doc)
 
-             ;; 補完候補をjediのもののみにする
-             ;; (setq ac-sources
-             ;;       (delete 'ac-source-words-in-same-mode-buffers ac-sources))
-             ;; (add-to-list 'ac-sources 'ac-source-filename)
-             ;; (add-to-list 'ac-sources 'ac-source-jedi-direct)  
-
              ;; 関数定義ジャンプ
-             ;; (defvar jedi:goto-stack '())
-             ;; (defun jedi:jump-to-definition ()
-             ;;   (interactive)
-             ;;   (add-to-list 'jedi:goto-stack
-             ;;                (list (buffer-name) (point)))
-             ;;   (jedi:goto-definition))
-             ;; (defun jedi:jump-back ()
-             ;;   (interactive)
-             ;;   (let ((p (pop jedi:goto-stack)))
-             ;;     (if p (progn
-             ;;            (switch-to-buffer (nth 0 p))
-             ;;            (goto-char (nth 1 p))))))
-             ;; (define-key python-mode-map "\C-cj" 'jedi:jump-to-definition)
-             ;; (define-key python-mode-map "\C-cp" 'jedi:jump-back)
-             ;; (define-key python-mode-map "\C-cr" 'helm-jedi-related-names)
+             (defvar jedi:goto-stack '())
+             (defun jedi:jump-to-definition ()
+               (interactive)
+               (add-to-list 'jedi:goto-stack
+                            (list (buffer-name) (point)))
+               (jedi:goto-definition))
+             (defun jedi:jump-back ()
+               (interactive)
+               (let ((p (pop jedi:goto-stack)))
+                 (if p (progn
+                        (switch-to-buffer (nth 0 p))
+                        (goto-char (nth 1 p))))))
+             (define-key python-mode-map "\C-cj" 'jedi:jump-to-definition)
+             (define-key python-mode-map "\C-cb" 'jedi:jump-back)
+             (define-key python-mode-map "\M-." 'jedi:jump-to-definition)
+             (define-key python-mode-map "\M-," 'jedi:jump-back)
+             (define-key python-mode-map "\C-cr" 'helm-jedi-related-names)
 
              ;; PEP8のチェック
              (require 'py-autopep8)
              (py-autopep8-enable-on-save)
              (add-hook 'before-save-hook 'py-autopep8-before-save)
              (setq py-autopep8-options '("--max-line-length=160"))
-             (define-key python-mode-map (kbd "C-c f") 'py-autopep8)
+             (define-key python-mode-map (kbd "C-cf") 'py-autopep8)
              
              ;; スニペット
              (require 'yasnippet)
