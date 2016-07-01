@@ -19,7 +19,7 @@ ln -sf $WORK_DIR/.bashrc ~/.bashrc
 ln -sf $WORK_DIR/.flake8 ~/.flake8
 ln -sf $WORK_DIR/.tmux.conf ~/.tmux.conf
 cp -r $WORK_DIR/.emacs.d ~/.emacs.d
-ln -sf $WORK_DIR/.emacs.d/init.d ~/.emacs.d/init.d
+ln -sf $WORK_DIR/.emacs.d/init.el ~/.emacs.d/init.el
 
 # Set host name
 sudo -E sh -c "echo $HOST_NAME > /etc/hostname"
@@ -32,7 +32,7 @@ git config --global credential.helper cache
 git config --global core.editor emacs
 
 # Install emacs
-sudo -E aptitude install -y gcc make ncurses-dev libjpeg8-dev libgif-dev libtiff4-dev libncurses5-dev libgnutls-dev libselinux1-dev
+sudo -E apt install -y gcc make ncurses-dev libjpeg8-dev libgif-dev libtiff4-dev libncurses5-dev libgnutls-dev libcurl4-gnutls-dev libselinux1-dev
 mkdir ~/dlp
 cd ~/dlp
 wget http://ftp.jaist.ac.jp/pub/GNU/emacs/$EMACS_VER.tar.gz
@@ -46,7 +46,7 @@ cd ~/.emacs.d
 git clone https://github.com/dimitri/el-get.git
     
 # Install tmux
-sudo -E aptitude -y build-dep ncurses-dev
+sudo -E apt -y build-dep ncurses-dev libevent-dev automake
 cd ~/dlp
 git clone https://github.com/tmux/tmux.git
 cd tmux
@@ -55,7 +55,7 @@ sh autogen.sh
 sudo -E make install
 
 # Install others
-sudo -E aptitude -y tig
+sudo -E apt -y tig
 
 
 #
@@ -71,7 +71,7 @@ pyenv install $MINICONDA_VER
 pyenv global $MINICONDA_VER
 
 # Install required python library
-pip install flake8 autopep8 ipython #jedi
+pip install flake8 autopep8 ipython #virtualenv jedi
 
 
 #
