@@ -139,11 +139,8 @@
 ;;; 前の単語を削除
 (global-set-key "\M-h" 'backward-kill-word)
 
-;;; 単語選択
-(global-set-key "\M-n"'mark-word)
-
-;;; 段落選択
-(global-set-key "\M-p"'mark-paragraph)
+;;; 後の単語を削除
+(global-set-key "\M-d" 'forward-kill-word)
 
 ;;; ペインの移動
 (global-set-key (kbd "C-c C-b")  'windmove-left)
