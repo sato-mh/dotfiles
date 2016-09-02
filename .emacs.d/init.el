@@ -104,6 +104,11 @@
 (global-auto-revert-mode 1)
 (setq auto-revert-check-vc-info t)
 
+;;; リモート接続
+(require 'tramp)
+;; (setq tramp-default-method "ssh")
+(setq tramp-default-method "scp")
+
 ;;; 選択範囲をisearch
 (defadvice isearch-mode (around isearch-mode-default-string (forward &optional regexp op-fun recursive-edit word-p) activate)
   (if (and transient-mark-mode mark-active (not (eq (mark) (point))))
