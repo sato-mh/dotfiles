@@ -46,7 +46,7 @@ cd ~/.emacs.d
 git clone https://github.com/dimitri/el-get.git
     
 # Install tmux
-sudo -E apt -y build-dep ncurses-dev libevent-dev automake
+sudo -E apt install -y ncurses-dev libevent-dev automake
 cd ~/dlp
 git clone https://github.com/tmux/tmux.git
 cd tmux
@@ -71,7 +71,7 @@ pyenv install $MINICONDA_VER
 pyenv global $MINICONDA_VER
 
 # Install required python library
-pip install flake8 autopep8 ipython #virtualenv jedi
+pip install flake8 autopep8 ipython
 
 
 #
