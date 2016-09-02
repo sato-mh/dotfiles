@@ -24,8 +24,9 @@ alias grep="grep --color"
 alias gopath="cd $GOPATH"
 alias sudo="sudo -E"
 alias relogin="exec -l $SHELL"
-alias remove-merged-branch="git branch --merged master | grep -vE '^\*|master$|develop$' | xargs -I % git branch -d %"
-alias remove-remote-merged-branach="git branch -r --merged master | grep -v -e master -e develop | sed -e 's% *origin/%%' | xargs -I% git push --delete origin %"
+alias git-rm-merged-branch="git branch --merged master | grep -vE '^\*|master$|develop$' | xargs -I % git branch -d %"
+alias git-rm-remote-merged-branach="git branch -r --merged master | grep -v -e master -e develop | sed -e 's% *origin/%%' | xargs -I% git push --delete origin %"
+alias docker-rm-all-container="docker rm $(docker ps -a -q)"
 # User specific aliases and functions
 stty stop undef
 
