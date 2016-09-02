@@ -67,7 +67,7 @@
 ;;; 行番号を表示する
 (global-linum-mode t)
 ;; 行番号表示箇所に3桁分の領域を確保
-;; (setq linum-format "%3d ")
+(setq linum-format "%3d ")
 
 ;;; 列数を表示する
 (column-number-mode t)
@@ -139,14 +139,11 @@
 ;;; 前の単語を削除
 (global-set-key "\M-h" 'backward-kill-word)
 
-;;; 後の単語を削除
-(global-set-key "\M-d" 'forward-kill-word)
-
 ;;; ペインの移動
-(global-set-key (kbd "C-c C-b")  'windmove-left)
-(global-set-key (kbd "C-c C-n")  'windmove-down)
-(global-set-key (kbd "C-c C-p")    'windmove-up)
-(global-set-key (kbd "C-c C-f") 'windmove-right)
+(global-set-key (kbd "\C-c C-b")  'windmove-left)
+(global-set-key (kbd "\C-c C-n")  'windmove-down)
+(global-set-key (kbd "\C-c C-p")    'windmove-up)
+(global-set-key (kbd "\C-c C-f") 'windmove-right)
 
 ;;; バッファの手動更新
 (global-set-key [f5] 'revert-buffer)
@@ -339,14 +336,32 @@
 
 
 ;;; Golang
-(el-get-bundle go-mode)
-(el-get-bundle go-autocomplete)
-(el-get-bundle go-eldoc)
-(el-get-bundle go-direx)
-(add-to-list 'exec-path (expand-file-name "~/.gvm/gos/go1.5.3/bin"))
-(add-to-list 'exec-path (expand-file-name "~/.gvm/pkgsets/go1.5.3/global/bin"))
 (add-hook 'go-mode-hook
           (lambda ()
+            ;;; auto-complete (companyにしたい)
+            (el-get-bundle auto-complete)
+            (require 'auto-complete)
+            (require 'auto-complete-config)
+            (add-to-list 'ac-modes 'go-mode)
+            (ac-set-trigger-key "TAB")
+            (setq ac-use-menu-map t)      ; 補完メニュー表示時にC-n/C-pで補完候補 選択
+            (setq ac-use-fuzzy t)         ; 曖昧マッチ
+            (setq ac-ignore-case `smart)  ; 大文字小文字を区別しない
+            ;; auto-complete の候補に日本語を含む単語が含まれないようにする
+            ;; http://d.hatena.ne.jp/IMAKADO/20090813/1250130343
+            (defadvice ac-word-candidates (after remove-word-contain-japanese activate)
+              (let ((contain-japanese (lambda (s) (string-match (rx (category 
+                                                                     japanese)) s))))
+                (setq ad-return-value
+                      (remove-if contain-japanese ad-return-value))))
+
+            ;; 初期設定
+            (el-get-bundle go-mode)
+            (el-get-bundle go-autocomplete)
+            (el-get-bundle go-eldoc)
+            (el-get-bundle go-direx)
+            (add-to-list 'exec-path (expand-file-name "~/.gvm/gos/go1.5.3/bin"))
+            (add-to-list 'exec-path (expand-file-name "~/.gvm/pkgsets/go1.5.3/global/bin"))
             ;; GOROOT, GOPATH環境変数の読み込み
             (let ((envs '("GOROOT" "GOPATH")))
               (exec-path-from-shell-copy-envs envs))
@@ -368,7 +383,6 @@
 
 
 ;;; Python
-;; (el-get-bundle jedi)
 (el-get-bundle company-jedi)
 (el-get-bundle py-autopep8)
 (el-get-bundle yasnippet)
@@ -377,11 +391,14 @@
           '(lambda()
              ;; 関数補完 (company-jedi)
              (require 'jedi-core)
-             (jedi:setup)
+             ;; (jedi:setup)
              (setq jedi:complete-on-dot t)
              (setq jedi:use-shortcuts t)
              (add-to-list 'company-backends 'company-jedi) ; backendに追加
-             (define-key python-mode-map "\C-cd" 'jedi:show-doc)
+             ;; 補完したいライブラリのパスを追加
+             ;; (setenv "PYTHONPATH" "/path")
+             (setenv "PYTHONPATH" "/home/vagrant/.pyenv/versions/miniconda3-4.0.5/envs/mlflow/lib/python3.5/site-packages:/home/vagrant/.pyenv/versions/miniconda3-4.0.5/envs/data-analysys/lib/python3.5/site-packages:/home/vagrant/.pyenv/shims")
+             (define-key python-mode-map "\C-c d" 'jedi:show-doc)
 
              ;; 関数定義ジャンプ
              (defvar jedi:goto-stack '())
@@ -396,8 +413,6 @@
                  (if p (progn
                         (switch-to-buffer (nth 0 p))
                         (goto-char (nth 1 p))))))
-             (define-key python-mode-map "\C-cj" 'jedi:jump-to-definition)
-             (define-key python-mode-map "\C-cb" 'jedi:jump-back)
              (define-key python-mode-map "\M-." 'jedi:jump-to-definition)
              (define-key python-mode-map "\M-," 'jedi:jump-back)
              (define-key python-mode-map "\C-cr" 'helm-jedi-related-names)
@@ -407,7 +422,7 @@
              (py-autopep8-enable-on-save)
              (add-hook 'before-save-hook 'py-autopep8-before-save)
              (setq py-autopep8-options '("--max-line-length=160"))
-             (define-key python-mode-map (kbd "C-cf") 'py-autopep8)
+             (define-key python-mode-map "\C-cf" 'py-autopep8)
              
              ;; スニペット
              (require 'yasnippet)
