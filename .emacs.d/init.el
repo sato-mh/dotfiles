@@ -104,10 +104,9 @@
 (global-auto-revert-mode 1)
 (setq auto-revert-check-vc-info t)
 
-;;; リモート接続
-(require 'tramp)
-;; (setq tramp-default-method "ssh")
-(setq tramp-default-method "scp")
+;;; リモート接続(デフォルトで使える？)
+;; (require 'tramp)
+;; (setq tramp-default-method "scp")
 
 ;;; 選択範囲をisearch
 (defadvice isearch-mode (around isearch-mode-default-string (forward &optional regexp op-fun recursive-edit word-p) activate)
@@ -122,16 +121,25 @@
           (isearch-repeat-forward)))
     ad-do-it))
 
-;;; 再起動時に色々復元
-;; (custom-set-variables '(desktop-save-mode t))
-;; (custom-set-faces)
 
+;;;
 ;;; dired設定
+;;;
+
+;;; dired-x を使用
 (require 'dired-x)
-;; dired-find-alternate-file の有効化
+
+;;; dired-find-alternate-file の有効化
 (put 'dired-find-alternate-file 'disabled nil)
-;; Enterを押した際に同じバッファでファイルを開く
+
+;;; Enterを押した際に同じバッファでファイルを開く
 (define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
+
+;;;  二つのdiredバッファを開いているとき、RやCのデフォルトの宛先がもう片方のディレクトリになる
+(setq dired-dwim-target t)
+
+;;; rを押した際にファイル名をまとめて編集可能なWDiredモードに入る
+(define-key dired-mode-map (kbd "r") 'wdired-change-to-wdired-mode)
 
 
 ;;;
@@ -232,12 +240,13 @@
                        ("*"   . 'mc/mark-all-like-this)
                        ("C-@" . 'er/expand-region)))
 
-
 ;;; helm
 (el-get-bundle helm)            ; helm本体
 (el-get-bundle helm-descbinds)  ; helmでキーバインドを表示
+(el-get-bundle helm-ls-git)     ; gitプロジェクト内の全ファイル検索
 (require 'helm-config)
 (require 'helm-descbinds)
+(require 'helm-ls-git)
 (helm-mode 1)
 
 ;; helm用キーバインド
@@ -253,7 +262,11 @@
 (define-key global-map (kbd "C-c g") 'helm-grep-do-git-grep)
 
 ;; helm-descbinds用キーバインド
-(global-set-key (kbd "C-c k") 'helm-descbinds)
+(global-set-key (kbd "C-c b") 'helm-descbinds)
+
+;; helm-ls-git用キーバインド
+(global-set-key (kbd "C-c p") 'helm-ls-git-ls)
+(global-set-key (kbd "C-x p") 'helm-ls-git-ls)
 
 ;; TABでnew bufferが作成しない(ファイルがない時は何もしない)
 (defadvice helm-ff-kill-or-find-buffer-fname (around execute-only-if-exist activate)
@@ -263,7 +276,6 @@
 
 ;; helm-buffers-list の詳細情報を非表示
 (setq helm-buffer-details-flag nil)
-
 
 ;;; company (オートコンプリート)
 (el-get-bundle company-mode)
@@ -300,6 +312,10 @@
 ;; (require 'company-quickhelp)
 ;; (company-quickhelp-mode 1)
 
+
+;;; git-gutter (動作が非常に重いので普段は使わない)
+(el-get-bundle git-gutter)
+(require 'git-gutter)
 
 ;;; flycheck (シンタックスチェック)
 (el-get-bundle flycheck)
