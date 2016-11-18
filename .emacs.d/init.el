@@ -55,7 +55,7 @@
 ;;; インデント変更 
 (setq-default c-basic-offset 2)
 
-;;; 自動インデントを無効
+;;; 自動インデントを有効
 (electric-indent-mode 1)
 
 ;;; "yes or no" の選択を "y or n" にする
@@ -181,9 +181,9 @@
 (require 'highlight-symbol)
 (setq highlight-symbol-idle-delay 0)
 (add-hook 'python-mode-hook 'highlight-symbol-mode)
-(add-hook 'yaml-mode 'highlight-symbol-mode)
-(add-hook 'emacs-lisp-mode 'highlight-symbol-mode)
-(add-hook 'js2-jsx-mode 'highlight-symbol-mode)
+(add-hook 'yaml-mode-hook 'highlight-symbol-mode)
+(add-hook 'emacs-lisp-mode-hook 'highlight-symbol-mode)
+(add-hook 'js2-jsx-mode-hook 'highlight-symbol-mode)
 
 ;;: インデントのハイライト
 (el-get-bundle highlight-indentation)
@@ -192,7 +192,7 @@
 (add-hook 'python-mode-hook 'highlight-indentation-current-column-mode)
 (add-hook 'yaml-mode-hook 'highlight-indentation-current-column-mode)
 (add-hook 'emacs-lisp-mode-hook 'highlight-indentation-current-column-mode)
-(add-hook 'js2-jsx-mode 'highlight-indentation-current-column-mode)
+(add-hook 'js2-jsx-mode-hook 'highlight-indentation-current-column-mode)
 
 ;;; コメントアウト
 (el-get-bundle comment-dwim-2)
@@ -286,6 +286,7 @@
 (setq company-idle-delay 0)             ; デフォルトは0.5
 (setq company-minimum-prefix-length 2)  ; デフォルトは4
 (setq company-selection-wrap-around t)  ; 一番下の候補で下を押すと最初に戻る
+(setq company-dabbrev-downcase nil)     ; lowercaseで補完される機能の停止
 
 ;; 不要なキーバインドを解除
 (define-key company-active-map (kbd "M-n") nil)
@@ -349,11 +350,25 @@
 
 ;;; JavaScript
 (el-get-bundle js2-mode)
+(el-get-bundle company-tern)
 (autoload 'js2-mode "js2-mode" nil t)
-
 ;; (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
 (add-to-list 'auto-mode-alist '("\\.js$" . js2-jsx-mode))
-(setq js-indent-level 2)    ; jsのインデント設定
+(add-hook 'js-mode-hook
+          (lambda ()
+            (setq js-indent-level 2)    ; jsのインデント設定
+            ;; (add-hook 'js2-mode-hook 'tern-mode)
+            (add-hook 'js2-jsx-mode-hook 'tern-mode)
+            (add-to-list 'company-backends 'company-tern) ; backendに追加
+
+            ;; 以下、現行バージョンのバグへの対応
+            ;; https://github.com/proofit404/company-tern/issues/13
+            ;; (defun company-tern-depth (candidate)
+            ;;   "Return depth attribute for CANDIDATE. 'nil' entries are treated as 0."
+            ;;   (let ((depth (get-text-property 0 'depth candidate)))
+            ;;     (if (eq depth nil) 0 depth)))
+            ))
+
 
 
 ;;; Golang
@@ -419,7 +434,7 @@
              ;; 補完したいライブラリのパスを追加
              ;; (setenv "PYTHONPATH" "/path")
              (setenv "PYTHONPATH" "/home/vagrant/.pyenv/versions/miniconda3-4.0.5/envs/mlflow/lib/python3.5/site-packages:/home/vagrant/.pyenv/versions/miniconda3-4.0.5/envs/data-analysys/lib/python3.5/site-packages:/home/vagrant/.pyenv/shims")
-             (define-key python-mode-map "\C-c d" 'jedi:show-doc)
+             (define-key python-mode-map "\C-c \C-d" 'jedi:show-doc)
 
              ;; 関数定義ジャンプ
              (defvar jedi:goto-stack '())
