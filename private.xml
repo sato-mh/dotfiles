@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<root>
+  <inputsourcedef>
+    <name>JA_IME</name>
+    <inputmodeid_equal>com.apple.inputmethod.Japanese</inputmodeid_equal>
+  </inputsourcedef>
+
+  <item>
+    <name>Private Setting</name>
+    <item>
+      <name>Switching Hankaku/Zenkaku Spaces</name>
+      <identifier>private.ime_space_to_hankaku</identifier>
+      <inputsource_only>JA_IME</inputsource_only>
+      <autogen>
+        __KeyToKey__
+        KeyCode::SPACE, ModifierFlag::SHIFT_L | ModifierFlag::NONE,
+        KeyCode::SPACE
+      </autogen>
+      <autogen>
+        __KeyToKey__
+        KeyCode::SPACE, ModifierFlag::SHIFT_R | ModifierFlag::NONE,
+        KeyCode::SPACE
+      </autogen>
+      <autogen>
+        __KeyToKey__
+        KeyCode::SPACE,
+        KeyCode::SPACE, ModifierFlag::SHIFT_L
+      </autogen>
+      <autogen>
+        __KeyToKey__
+        KeyCode::SPACE, ModifierFlag::CONTROL_L,
+        KeyCode::SPACE, ModifierFlag::CONTROL_L,
+      </autogen>
+    </item>
+    <item>
+      <name>EISUU to Option_L</name>
+      <appendix>(+ When you type EISUU only, send EISUU)</appendix>
+      <identifier>private.jis_eisuu2optionL</identifier>
+      <autogen>__KeyOverlaidModifier__ KeyCode::JIS_EISUU, KeyCode::OPTION_L, KeyCode::JIS_EISUU</autogen>
+    </item>
+    <item>
+      <name>Option+h to Option+Delete</name>
+      <identifier>private.optionH2optionDelete</identifier>
+      <autogen>
+        __KeyToKey__
+        KeyCode::H, ModifierFlag::OPTION_R,
+        KeyCode::DELETE, ModifierFlag::OPTION_R,
+      </autogen>
+      <autogen>
+        __KeyToKey__
+        KeyCode::H, ModifierFlag::OPTION_L,
+        KeyCode::DELETE, ModifierFlag::OPTION_L,
+      </autogen>
+    </item>
+    <item>
+      <name>Option+d to Option+Fn+Delete</name>
+      <identifier>private.optionD2optionFnDelete</identifier>
+        <autogen>
+          __KeyToKey__
+          KeyCode::D, ModifierFlag::OPTION_R,
+          KeyCode::DELETE, ModifierFlag::OPTION_R, ModifierFlag::FN,
+        </autogen>
+        <autogen>
+          __KeyToKey__
+          KeyCode::D, ModifierFlag::OPTION_L,
+          KeyCode::DELETE, ModifierFlag::OPTION_L, ModifierFlag::FN,
+        </autogen>
+    </item>
+  </item>
+</root>
