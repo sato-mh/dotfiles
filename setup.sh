@@ -71,7 +71,7 @@ pyenv install $MINICONDA_VER
 pyenv global $MINICONDA_VER
 
 # Install required python library
-pip install flake8 autopep8 ipython
+pip install flake8 autopep8
 
 
 #

@@ -277,6 +277,9 @@
 ;; helm-buffers-list の詳細情報を非表示
 (setq helm-buffer-details-flag nil)
 
+;;; auto-completeを使用しない
+(auto-complete-mode -1)
+
 ;;; company (オートコンプリート)
 (el-get-bundle company-mode)
 (require 'company)
@@ -304,8 +307,20 @@
 (define-key company-search-map (kbd "C-n") 'company-select-next)
 (define-key company-search-map (kbd "C-p") 'company-select-previous)
 
-;;; 候補が1つならばtabで補完、複数候補があればtabで次の候補へ行く
+;; 候補が1つならばtabで補完、複数候補があればtabで次の候補へ行く
 (define-key company-active-map (kbd "C-i") 'company-complete-common-or-cycle)
+
+;; デフォルトではdocumentに移動できないのでcompany-doc-bufferを固定する
+(defun my/company-show-doc-buffer ()
+  "Temporarily show the documentation buffer for the selection."
+  (interactive)
+  (let* ((selected (nth company-selection company-candidates))
+         (doc-buffer (or (company-call-backend 'doc-buffer selected)
+                         (error "No documentation available"))))
+    (with-current-buffer doc-buffer
+      (goto-char (point-min)))
+    (display-buffer doc-buffer t)))
+(define-key company-active-map (kbd "M-d") #'my/company-show-doc-buffer)
 
 ;; 関数のドキュメントをポップアップ表示(terminal上では動作しない)
 ;; (el-get-bundle company-quickhelp)
@@ -419,6 +434,7 @@
 
 
 ;;; Python
+(el-get-bundle jedi)
 (el-get-bundle company-jedi)
 (el-get-bundle py-autopep8)
 (el-get-bundle yasnippet)
@@ -433,7 +449,8 @@
              (add-to-list 'company-backends 'company-jedi) ; backendに追加
              ;; 補完したいライブラリのパスを追加
              ;; (setenv "PYTHONPATH" "/path")
-             (setenv "PYTHONPATH" "/home/vagrant/.pyenv/versions/miniconda3-4.0.5/envs/mlflow/lib/python3.5/site-packages:/home/vagrant/.pyenv/versions/miniconda3-4.0.5/envs/data-analysys/lib/python3.5/site-packages:/home/vagrant/.pyenv/shims")
+             ;; (setenv "PYTHONPATH" "/home/vagrant/.pyenv/versions/miniconda3-4.0.5/envs/mlflow/lib/python3.5/site-packages:/home/vagrant/.pyenv/versions/miniconda3-4.0.5/envs/data-analysys/lib/python3.5/site-packages:/home/vagrant/.pyenv/shims")
+             (setenv "PYTHONPATH" "/Users/sci01553/.pyenv/versions/miniconda3-4.0.5/envs/mlflow/lib/python3.5/site-packages:/Users/sci01553/.pyenv/versions/miniconda3-4.0.5/envs/data-analysys/lib/python3.5/site-packages:/home/vagrant/.pyenv/shims")
              (define-key python-mode-map "\C-c \C-d" 'jedi:show-doc)
 
              ;; 関数定義ジャンプ
