@@ -168,7 +168,6 @@
 (setq mac-option-modifier 'meta)
 
 
-
 ;;;
 ;;; el-getを使ったパッケージ設定
 ;;;
@@ -184,6 +183,17 @@
 (add-hook 'yaml-mode-hook 'highlight-symbol-mode)
 (add-hook 'emacs-lisp-mode-hook 'highlight-symbol-mode)
 (add-hook 'js2-jsx-mode-hook 'highlight-symbol-mode)
+
+(setq highlight-symbol-colors
+     '(
+       "DarkOrange" "DodgerBlue1" "DeepPink1"
+       "goldenrod3" "orchid2" "chartreuse3"
+       "yellow3" "firebrick1" "green2"
+       "IndianRed3" "SeaGreen3" "cornflower blue"
+       "SlateBlue2" "medium orchid" "sea green"
+       ))
+(global-set-key (kbd "M-n") 'highlight-symbol-next)
+(global-set-key (kbd "M-p") 'highlight-symbol-prev)
 
 ;;: インデントのハイライト
 (el-get-bundle highlight-indentation)
@@ -266,7 +276,7 @@
 
 ;; helm-ls-git用キーバインド
 (global-set-key (kbd "C-c p") 'helm-ls-git-ls)
-(global-set-key (kbd "C-x p") 'helm-ls-git-ls)
+(global-set-key (kbd "M-l") 'helm-ls-git-ls)
 
 ;; TABでnew bufferが作成しない(ファイルがない時は何もしない)
 (defadvice helm-ff-kill-or-find-buffer-fname (around execute-only-if-exist activate)
@@ -342,9 +352,9 @@
 (setq flycheck-check-syntax-automatically '(mode-enabled save))
 
 ;; キーバインド
-(define-key global-map (kbd "M-n") 'flycheck-next-error)
-(define-key global-map (kbd "M-p") 'flycheck-previous-error)
-(define-key global-map (kbd "M-l") 'flycheck-list-errors)
+(define-key global-map (kbd "C-c M-n") 'flycheck-next-error)
+(define-key global-map (kbd "C-c M-p") 'flycheck-previous-error)
+(define-key global-map (kbd "C-c M-l") 'flycheck-list-errors)
 
 
 ;;; markdown

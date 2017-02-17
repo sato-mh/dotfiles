@@ -26,11 +26,11 @@ alias sudo="sudo -E"
 alias relogin="exec -l $SHELL"
 alias git-rm-merged-branch="git branch --merged master | grep -vE '^\*|master$|develop$' | xargs -I % git branch -d %"
 alias git-rm-remote-merged-branach="git branch -r --merged master | grep -v -e master -e develop | sed -e 's% *origin/%%' | xargs -I% git push --delete origin %"
-alias docker-rm-all-container="docker rm $(docker ps -a -q)"
+alias docker-rm-all-container="docker ps -a -q | xargs docker rm -f"
 # User specific aliases and functions
 stty stop undef
 
-# Setting for history
+# history
 function share_history {
     history -a
     history -c
@@ -42,10 +42,10 @@ shopt -u histappend
 export HISTSIZE=10000
 export HISTTIMEFORMAT='%Y/%m/%d %H:%M:%S '
 
-# Setting for terminal colors
+# terminal colors
 TERM=xterm-256color
 
-# Setting for PS1
+# PS1
 # PS1="[\u@\h \W]\\$ "    # デフォルト設定
 function parse_git_branch {
     git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ [\1]/'
@@ -78,12 +78,12 @@ function promps {
 }
 promps
 
-# Setting for bash_completion
+# bash_completion
 if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
 
-# Setting for pyenv
+# pyenv
 export PYENV_ROOT="${HOME}/.pyenv"
 if [ -d "${PYENV_ROOT}" ]; then
     export PATH=${PYENV_ROOT}/bin:$PATH
@@ -92,13 +92,15 @@ if [ -d "${PYENV_ROOT}" ]; then
     eval "$(pyenv virtualenv-init -)"
 fi
 
-# Setting for nvm
+# nvm
 if [[ -s ~/.nvm/nvm.sh ]];
  then source ~/.nvm/nvm.sh
 fi
 
-# Setting for GVM
+# GVM
 # export PATH=$PATH:$HOME/.gvm/bin
 # [[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
 # gvm use go1.5.3    
 
+# mysql by docker
+export MYSQL_HOST=0.0.0.0
