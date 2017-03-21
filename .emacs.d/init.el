@@ -286,10 +286,7 @@
 ;; helm-buffers-list の詳細情報を非表示
 (setq helm-buffer-details-flag nil)
 
-;;; auto-completeを使用しない
-(auto-complete-mode -1)
-
-;;; company (オートコンプリート)
+;;; company (補完機能)
 (el-get-bundle company-mode)
 (require 'company)
 
@@ -447,6 +444,7 @@
 (el-get-bundle company-jedi)
 (el-get-bundle py-autopep8)
 (el-get-bundle yasnippet)
+(auto-complete-mode -1) ; auto-completeを使用しない
 
 (add-hook 'python-mode-hook
           '(lambda()

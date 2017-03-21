@@ -3,10 +3,10 @@
 # Usage: bash setup.sh
 
 # Specified variables
-readonly HOST_NAME=ubuntu14
-readonly EMACS_VER=emacs-24.5
-readonly MINICONDA_VER=miniconda3-4.0.5
-readonly NODE_VER=v5.7.1
+readonly HOST_NAME=ubuntu16
+readonly EMACS_VER=emacs-25.1
+readonly MINICONDA_VER=miniconda3-4.1.11
+readonly NODE_VER=v6.10.0
 
 
 #
@@ -31,8 +31,10 @@ sudo -E timedatectl set-timezone Asia/Tokyo
 git config --global credential.helper cache
 git config --global core.editor emacs
 
+# update apt package list
+sudo -E apt update
+
 # Install emacs
-sudo -E apt install -y gcc make ncurses-dev libjpeg8-dev libgif-dev libtiff4-dev libncurses5-dev libgnutls-dev libcurl4-gnutls-dev libselinux1-dev
 mkdir ~/dlp
 cd ~/dlp
 wget http://ftp.jaist.ac.jp/pub/GNU/emacs/$EMACS_VER.tar.gz
@@ -68,10 +70,17 @@ source ~/.bashrc
 
 # Install miniconda
 pyenv install $MINICONDA_VER
-pyenv global $MINICONDA_VER
+pyenv activate $MINICONDA_VER
+pyenv virtualenv global
+pyenv global global
+pyenv activate global
 
-# Install required python library
+# Install library required my python environment
 pip install flake8 autopep8
+
+# Install library required by jedi
+# pip install virtualenv
+# pip install --upgrade ~/.emacs.d/elisp/jedi/
 
 
 #
