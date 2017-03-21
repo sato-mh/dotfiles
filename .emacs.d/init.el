@@ -230,7 +230,6 @@
 (require 'expand-region)
 (global-set-key (kbd "C-\]") 'er/expand-region)      ; リージョンを広げる
 (global-set-key (kbd "C-M-\]") 'er/contract-region)  ; リージョンを狭める
-(global-set-key (kbd "C-M-@") 'er/contract-region)   ; リージョンを狭める
 
 ;;; 複数カーソル
 (el-get-bundle multiple-cursors)
