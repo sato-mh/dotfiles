@@ -121,6 +121,39 @@
           (isearch-repeat-forward)))
     ad-do-it))
 
+;;; ウィンドウサイズの変更
+(defun window-resizer ()
+  "Control window size and position."
+  (interactive)
+  (let ((window-obj (selected-window))
+        (current-width (window-width))
+        (current-height (window-height))
+        (dx (if (= (nth 0 (window-edges)) 0) 1 -1))
+        (dy (if (= (nth 1 (window-edges)) 0) 1 -1))
+        action c)
+    (catch 'end-flag
+      (while t
+        (setq action (read-key-sequence-vector (format "size[%dx%d]"
+                                                       (window-width)
+                                                       (window-height))))
+        (setq c (aref action 0))
+        (cond ((= c ?f)
+               (enlarge-window-horizontally dx))
+              ((= c ?b)
+               (shrink-window-horizontally dx))
+              ((= c ?n)
+               (enlarge-window dy))
+              ((= c ?p)
+               (shrink-window dy))
+              ;; otherwise
+              (t
+               (let ((last-command-char (aref action 0))
+                     (command (key-binding action)))
+                 (when command (call-interactively command)))
+               (message "Quit")
+               (throw 'end-flag t)))))))
+(global-set-key "\C-cw" 'window-resizer)
+
 
 ;;;
 ;;; dired設定
@@ -243,11 +276,9 @@
     global-map "C-t" '(("C-n" . 'mc/mark-next-like-this)
                        ("C-p" . 'mc/mark-previous-like-this)
                        ("C-u" . 'mc/unmark-next-like-this)
-                       ("C-U" . 'mc/unmark-previous-like-this)
                        ("C-s" . 'mc/skip-to-next-like-this)
-                       ("C-S" . 'mc/skip-to-previous-like-this)
                        ("*"   . 'mc/mark-all-like-this)
-                       ("C-@" . 'er/expand-region)))
+                       ))
 
 ;;; helm
 (el-get-bundle helm)            ; helm本体
@@ -351,9 +382,9 @@
 (setq flycheck-check-syntax-automatically '(mode-enabled save))
 
 ;; キーバインド
-(define-key global-map (kbd "C-c M-n") 'flycheck-next-error)
-(define-key global-map (kbd "C-c M-p") 'flycheck-previous-error)
-(define-key global-map (kbd "C-c M-l") 'flycheck-list-errors)
+(define-key global-map (kbd "C-c n") 'flycheck-next-error)
+(define-key global-map (kbd "C-c p") 'flycheck-previous-error)
+(define-key global-map (kbd "C-c l") 'flycheck-list-errors)
 
 
 ;;; markdown
