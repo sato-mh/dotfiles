@@ -512,7 +512,7 @@
              (require 'py-autopep8)
              (py-autopep8-enable-on-save)
              (add-hook 'before-save-hook 'py-autopep8-before-save)
-             (setq py-autopep8-options '("--max-line-length=160"))
+             (setq py-autopep8-options '("--max-line-length=80"))
              (define-key python-mode-map "\C-cf" 'py-autopep8)
              
              ;; スニペット
