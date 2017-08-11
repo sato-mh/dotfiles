@@ -76,7 +76,7 @@ pyenv global global
 pyenv activate global
 
 # Install library required my python environment
-pip install flake8 autopep8
+pip install flake8 autopep8 pipreqs
 
 # Install library required by jedi
 # pip install virtualenv

@@ -8,6 +8,7 @@ fi
 # Alias
 case "${OSTYPE}" in
     darwin*)
+        export LSCOLORS=gxfxcxdxbxegedabagacad
         alias l="ls -lhG"
 	      alias l.="ls -lhG -d .*"
 	      alias ll="ls -lahG"
@@ -20,6 +21,7 @@ case "${OSTYPE}" in
 	      alias ls="ls --color=auto"
 	      ;;
 esac
+alias e="emacsclient -nw"
 alias grep="grep --color"
 alias gopath="cd $GOPATH"
 alias sudo="sudo -E"
@@ -27,7 +29,9 @@ alias relogin="exec -l $SHELL"
 alias git-rm-merged-branch="git branch --merged master | grep -vE '^\*|master$|develop$' | xargs -I % git branch -d %"
 alias git-rm-remote-merged-branach="git branch -r --merged master | grep -v -e master -e develop | sed -e 's% *origin/%%' | xargs -I% git push --delete origin %"
 alias docker-rm-all-container="docker ps -a -q | xargs docker rm -f"
-# User specific aliases and functions
+alias docker-run-with-my-env="docker run -it -v ~/dotfiles:/root/dotfiles -v ~/projects/:/root/projects -v ~/.pyenv:/root/.pyenv"
+
+# undef default keybind
 stty stop undef
 
 # history
@@ -35,7 +39,6 @@ function share_history {
     history -a
     history -c
     history -r
-    
 }
 PROMPT_COMMAND='share_history'
 shopt -u histappend
@@ -77,11 +80,6 @@ function promps {
     PS1="${TITLEBAR}${LIGHT_RED}${BASE}${WHITE}:${YELLOW}\W${LIGHT_GREEN}\$(parse_git_branch)${YELLOW}\$${WHITE} "
 }
 promps
-
-# bash_completion
-if [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-fi
 
 # pyenv
 export PYENV_ROOT="${HOME}/.pyenv"

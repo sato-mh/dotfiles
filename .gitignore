@@ -1,2 +1,20 @@
+# emacs
 .emacs.d/auto-save-file-list
+
+# jupyter
+.ipynb_checkpoints
+
+# Mac
 .DS_Store
+
+# Node
+node_modules
+
+# pyenv
+.python-version
+
+# python_cache
+__pycache__
+
+# tern
+.tern-port
