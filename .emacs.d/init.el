@@ -1,7 +1,7 @@
 
+
 ;;; package --- init.el ---
 ;;; Code:
-
 
 ;;; 
 ;;; 基本設定
@@ -22,8 +22,14 @@
 ;;; el-getの設定
 (add-to-list 'load-path (locate-user-emacs-file "el-get"))
 (require 'el-get)
+
 ;; el-getでダウンロードしたパッケージは ~/.emacs.d/elisp に入るようにする
 (setq el-get-dir (locate-user-emacs-file "~/.emacs.d/elisp"))
+
+;;; emacs の起動速度可視化
+;; (require 'initchart)
+;; (initchart-record-execution-time-of load file)
+;; (initchart-record-execution-time-of require feature)
 
 ;;; 環境を日本語、UTF-8にする
 (set-language-environment "Japanese")
@@ -104,10 +110,6 @@
 (global-auto-revert-mode 1)
 (setq auto-revert-check-vc-info t)
 
-;;; リモート接続(デフォルトで使える？)
-;; (require 'tramp)
-;; (setq tramp-default-method "scp")
-
 ;;; 選択範囲をisearch
 (defadvice isearch-mode (around isearch-mode-default-string (forward &optional regexp op-fun recursive-edit word-p) activate)
   (if (and transient-mark-mode mark-active (not (eq (mark) (point))))
@@ -160,7 +162,7 @@
 ;;;
 
 ;;; dired-x を使用
-(require 'dired-x)
+(autoload 'dired-x "dired-x")
 
 ;;; dired-find-alternate-file の有効化
 (put 'dired-find-alternate-file 'disabled nil)
@@ -178,9 +180,6 @@
 ;;;
 ;;; キーバインド設定
 ;;;
-
-;;; 指定行にジャンプする
-(global-set-key "\C-xj" 'goto-line)
 
 ;;; 前の単語を削除
 (global-set-key "\M-h" 'backward-kill-word)
@@ -215,6 +214,7 @@
 (add-hook 'python-mode-hook 'highlight-symbol-mode)
 (add-hook 'yaml-mode-hook 'highlight-symbol-mode)
 (add-hook 'emacs-lisp-mode-hook 'highlight-symbol-mode)
+(add-hook 'js2-mode-hook 'highlight-symbol-mode)
 (add-hook 'js2-jsx-mode-hook 'highlight-symbol-mode)
 
 (setq highlight-symbol-colors
@@ -235,23 +235,24 @@
 (add-hook 'python-mode-hook 'highlight-indentation-current-column-mode)
 (add-hook 'yaml-mode-hook 'highlight-indentation-current-column-mode)
 (add-hook 'emacs-lisp-mode-hook 'highlight-indentation-current-column-mode)
+(add-hook 'js2-mode-hook 'highlight-indentation-current-column-mode)
 (add-hook 'js2-jsx-mode-hook 'highlight-indentation-current-column-mode)
 
 ;;; コメントアウト
 (el-get-bundle comment-dwim-2)
-(require 'comment-dwim-2)
+(autoload 'comment-dwim-2 "comment-dwim-2")
 (setq comment-dwim-2--inline-comment-behavior 'reindent-comment)
 (global-set-key (kbd "M-;") 'comment-dwim-2)
 
 ;;; ペインの回転
 (el-get-bundle daichirata/emacs-rotate)
-(require 'rotate)
+(autoload 'rotate "rotate")
 (global-set-key (kbd "M-o") 'rotate-layout)
 (global-set-key (kbd "C-x C-o") 'rotate-window)
 
 ;;; 検索・置換機能の拡張
 (el-get-bundle anzu)
-(require 'anzu)
+(autoload 'anzu "anzu")
 (global-anzu-mode +1)
 (setq anzu-search-threshold 1000)
 (setq anzu-minimum-input-length 3)
@@ -260,13 +261,13 @@
 
 ;;; 選択範囲を拡張
 (el-get-bundle expand-region)
-(require 'expand-region)
+(autoload 'expand-region "expand-region")
 (global-set-key (kbd "C-\]") 'er/expand-region)      ; リージョンを広げる
 (global-set-key (kbd "C-M-\]") 'er/contract-region)  ; リージョンを狭める
 
 ;;; 複数カーソル
 (el-get-bundle multiple-cursors)
-(require 'multiple-cursors)
+(autoload 'multiple-cursors "multiple-cursors")
 
 ;;; prefixによる連続操作のキーバインド設定
 (el-get-bundle smartrep)
@@ -284,9 +285,9 @@
 (el-get-bundle helm)            ; helm本体
 (el-get-bundle helm-descbinds)  ; helmでキーバインドを表示
 (el-get-bundle helm-ls-git)     ; gitプロジェクト内の全ファイル検索
-(require 'helm-config)
-(require 'helm-descbinds)
-(require 'helm-ls-git)
+(autoload 'helm-config "helm-config")
+(autoload 'helm-descbinds "helm-descbinds")
+(autoload 'helm-ls-git "helm-ls-git")
 (helm-mode 1)
 
 ;; helm用キーバインド
@@ -305,8 +306,7 @@
 (global-set-key (kbd "C-c b") 'helm-descbinds)
 
 ;; helm-ls-git用キーバインド
-(global-set-key (kbd "C-c p") 'helm-ls-git-ls)
-(global-set-key (kbd "M-l") 'helm-ls-git-ls)
+(global-set-key (kbd "C-c l") 'helm-ls-git-ls)
 
 ;; TABでnew bufferが作成しない(ファイルがない時は何もしない)
 (defadvice helm-ff-kill-or-find-buffer-fname (around execute-only-if-exist activate)
@@ -319,7 +319,8 @@
 
 ;;; company (補完機能)
 (el-get-bundle company-mode)
-(require 'company)
+;; (require 'company)
+(autoload 'company "company")
 
 ;; 基本設定
 (global-company-mode)                   ; 全バッファでcompanyを有効にする
@@ -366,22 +367,19 @@
 ;; (company-quickhelp-mode 1)
 
 
-;;; git-gutter (動作が非常に重いので普段は使わない)
-(el-get-bundle git-gutter)
-(require 'git-gutter)
-
 ;;; flycheck (シンタックスチェック)
 (el-get-bundle flycheck)
-(require 'flycheck)
+(autoload 'flycheck "flycheck")
 (global-flycheck-mode)
 
 ;; 保存時に自動チェック
 (setq flycheck-check-syntax-automatically '(mode-enabled save))
 
 ;; キーバインド
-(define-key global-map (kbd "C-c n") 'flycheck-next-error)
-(define-key global-map (kbd "C-c p") 'flycheck-previous-error)
-(define-key global-map (kbd "C-c l") 'flycheck-list-errors)
+;; (define-key global-map (kbd "C-c n") 'flycheck-next-error)
+;; (define-key global-map (kbd "C-c p") 'flycheck-previous-error)
+;; (define-key global-map (kbd "C-c l") 'flycheck-list-errors)
+(define-key global-map (kbd "M-g l") 'flycheck-list-errors)
 
 
 ;;; markdown
@@ -400,82 +398,46 @@
 (add-to-list 'auto-mode-alist '("\\.raml\\'" . yaml-mode))
 
 
+;;; json
+(el-get-bundle json-mode)
+;; (add-to-list 'auto-mode-alist '("\\.json\\'" . json-mode))
+
+
+;;; docker
+(el-get-bundle dockerfile-mode)
+
+
 ;;; JavaScript
 (el-get-bundle js2-mode)
 (el-get-bundle company-tern)
 (autoload 'js2-mode "js2-mode" nil t)
-;; (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
-(add-to-list 'auto-mode-alist '("\\.js$" . js2-jsx-mode))
+(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
+;; (add-to-list 'auto-mode-alist '("\\.js$" . js2-jsx-mode))
+(eval-after-load 'flycheck
+  '(custom-set-variables
+    '(flycheck-disabled-checkers '(javascript-jshint javascript-jscs))
+    ))
+
 (add-hook 'js-mode-hook
           (lambda ()
             (setq js-indent-level 2)    ; jsのインデント設定
-            ;; (add-hook 'js2-mode-hook 'tern-mode)
             (add-hook 'js2-jsx-mode-hook 'tern-mode)
             (add-to-list 'company-backends 'company-tern) ; backendに追加
 
-            ;; 以下、現行バージョンのバグへの対応
-            ;; https://github.com/proofit404/company-tern/issues/13
-            ;; (defun company-tern-depth (candidate)
-            ;;   "Return depth attribute for CANDIDATE. 'nil' entries are treated as 0."
-            ;;   (let ((depth (get-text-property 0 'depth candidate)))
-            ;;     (if (eq depth nil) 0 depth)))
+            ;; ESlint と競合する js2-mode の機能を無効化
+            (setq js2-include-browser-externs nil)
+            (setq js2-mode-show-parse-errors nil)
+            (setq js2-mode-show-strict-warnings nil)
+            (setq js2-highlight-external-variables nil)
+            (setq js2-include-jslint-globals nil)
             ))
-
-
-
-;;; Golang
-(add-hook 'go-mode-hook
-          (lambda ()
-            ;;; auto-complete (companyにしたい)
-            (el-get-bundle auto-complete)
-            (require 'auto-complete)
-            (require 'auto-complete-config)
-            (add-to-list 'ac-modes 'go-mode)
-            (ac-set-trigger-key "TAB")
-            (setq ac-use-menu-map t)      ; 補完メニュー表示時にC-n/C-pで補完候補 選択
-            (setq ac-use-fuzzy t)         ; 曖昧マッチ
-            (setq ac-ignore-case `smart)  ; 大文字小文字を区別しない
-            ;; auto-complete の候補に日本語を含む単語が含まれないようにする
-            ;; http://d.hatena.ne.jp/IMAKADO/20090813/1250130343
-            (defadvice ac-word-candidates (after remove-word-contain-japanese activate)
-              (let ((contain-japanese (lambda (s) (string-match (rx (category 
-                                                                     japanese)) s))))
-                (setq ad-return-value
-                      (remove-if contain-japanese ad-return-value))))
-
-            ;; 初期設定
-            (el-get-bundle go-mode)
-            (el-get-bundle go-autocomplete)
-            (el-get-bundle go-eldoc)
-            (el-get-bundle go-direx)
-            (add-to-list 'exec-path (expand-file-name "~/.gvm/gos/go1.5.3/bin"))
-            (add-to-list 'exec-path (expand-file-name "~/.gvm/pkgsets/go1.5.3/global/bin"))
-            ;; GOROOT, GOPATH環境変数の読み込み
-            (let ((envs '("GOROOT" "GOPATH")))
-              (exec-path-from-shell-copy-envs envs))
-            (setq-default)
-            ;; indentの設定
-            (setq tab-width 2)
-            (setq standard-indent 2)
-            (setq indent-tabs-mode nil)
-            ;; 自動インデント
-            (add-hook 'before-save-hook 'gofmt-before-save)
-            ;; godef keybind
-            (local-set-key (kbd "M-.") 'godef-jump)
-            (local-set-key (kbd "M-,") 'pop-tag-mark)
-            ))
-(eval-after-load "go-mode"
-  '(progn
-     (require 'go-autocomplete)
-     (add-hook 'go-mode-hook 'go-eldoc-setup)))
 
 
 ;;; Python
-(el-get-bundle jedi)
+;; (el-get-bundle jedi)
 (el-get-bundle company-jedi)
 (el-get-bundle py-autopep8)
 (el-get-bundle yasnippet)
-(auto-complete-mode -1) ; auto-completeを使用しない
 
 (add-hook 'python-mode-hook
           '(lambda()
@@ -512,7 +474,7 @@
              (require 'py-autopep8)
              (py-autopep8-enable-on-save)
              (add-hook 'before-save-hook 'py-autopep8-before-save)
-             (setq py-autopep8-options '("--max-line-length=80"))
+             (setq py-autopep8-options '("--max-line-length=160"))
              (define-key python-mode-map "\C-cf" 'py-autopep8)
              
              ;; スニペット
