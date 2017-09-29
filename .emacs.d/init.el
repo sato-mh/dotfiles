@@ -8,6 +8,13 @@
 ;;;
 
 ;;; load-pathを追加する関数を定義
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+
+;;; ディレクトリをサブディレクトリごとload-pathに追加する関数を定義
 (defun add-to-load-path (&rest paths)
   (let (path)
     (dolist (path paths paths)
@@ -17,7 +24,24 @@
             (normal-top-level-add-subdirs-to-load-path))))))
 
 ;;; ディレクトリをサブディレクトリごとload-pathに追加
-(add-to-load-path "elpa" "elisp")
+;;; (add-to-load-path "elpa" "elisp")
+
+;; package.elの保存先とリポジトリの追加
+(setq package-user-dir "~/.emacs.d/elisp/elpa/")
+(setq package-archives
+      '(("gnu"   . "http://elpa.gnu.org/packages/")
+        ("melpa" . "http://melpa.org/packages/")
+        ("org"   . "http://orgmode.org/elpa/")))
+(package-initialize)
+
+;; use-packageをと必須パッケージを自動インストール
+(when (not (package-installed-p 'use-package))
+  (package-refresh-contents)
+  (package-install 'use-package))
+(require 'use-package)
+(require 'bind-key)
+(require 'diminish)
+
 
 ;;; el-getの設定
 (add-to-list 'load-path (locate-user-emacs-file "el-get"))
@@ -41,8 +65,10 @@
 (prefer-coding-system 'utf-8)
 
 ;;; カラーテーマの設定
-(el-get-bundle oneKelvinSmith/monokai-emacs)
-(load-theme 'monokai t)
+(use-package monokai-theme
+  :ensure t
+  :config
+  (load-theme 'monokai t))
 
 ;;; スタートアップメッセージを表示させない
 (setq inhibit-startup-message t)
@@ -58,7 +84,7 @@
 (setq-default tab-width 2)
 (setq-default indent-tabs-mode nil)
 
-;;; インデント変更 
+;;; インデント変更
 (setq-default c-basic-offset 2)
 
 ;;; 自動インデントを有効
@@ -92,8 +118,8 @@
 
 ;;; ウィンドウ内に収まらないときだけ、カッコ内も光らせる
 (setq show-paren-style 'mixed)
-(set-face-background 'show-paren-match-face "grey")
-(set-face-foreground 'show-paren-match-face "black")
+;; (set-face-background 'show-paren-match-face "grey")
+;; (set-face-foreground 'show-paren-match-face "black")
 
 ;;; スクロールは１行ごとに
 (setq scroll-conservatively 1)
@@ -205,19 +231,20 @@
 ;;;
 
 ;;; shellの環境変数引継ぎ
-(el-get-bundle exec-path-from-shell)
+(use-package exec-path-from-shell
+  :ensure t)
 
 ;;; 同じ単語をハイライト
-(el-get-bundle highlight-symbol)
-(require 'highlight-symbol)
-(setq highlight-symbol-idle-delay 0)
-(add-hook 'python-mode-hook 'highlight-symbol-mode)
-(add-hook 'yaml-mode-hook 'highlight-symbol-mode)
-(add-hook 'emacs-lisp-mode-hook 'highlight-symbol-mode)
-(add-hook 'js2-mode-hook 'highlight-symbol-mode)
-(add-hook 'js2-jsx-mode-hook 'highlight-symbol-mode)
-
-(setq highlight-symbol-colors
+(use-package highlight-symbol
+  :ensure t
+  :config
+  (setq highlight-symbol-idle-delay 0)
+  (add-hook 'python-mode-hook 'highlight-symbol-mode)
+  (add-hook 'yaml-mode-hook 'highlight-symbol-mode)
+  (add-hook 'emacs-lisp-mode-hook 'highlight-symbol-mode)
+  (add-hook 'js2-mode-hook 'highlight-symbol-mode)
+  (add-hook 'js2-jsx-mode-hook 'highlight-symbol-mode)
+  (setq highlight-symbol-colors
      '(
        "DarkOrange" "DodgerBlue1" "DeepPink1"
        "goldenrod3" "orchid2" "chartreuse3"
@@ -225,198 +252,236 @@
        "IndianRed3" "SeaGreen3" "cornflower blue"
        "SlateBlue2" "medium orchid" "sea green"
        ))
-(global-set-key (kbd "M-n") 'highlight-symbol-next)
-(global-set-key (kbd "M-p") 'highlight-symbol-prev)
+  (global-set-key (kbd "M-n") 'highlight-symbol-next)
+  (global-set-key (kbd "M-p") 'highlight-symbol-prev))
 
 ;;: インデントのハイライト
-(el-get-bundle highlight-indentation)
-(require 'highlight-indentation)
-(set-face-background 'highlight-indentation-face "#40483e")  ; 色の指定
-(add-hook 'python-mode-hook 'highlight-indentation-current-column-mode)
-(add-hook 'yaml-mode-hook 'highlight-indentation-current-column-mode)
-(add-hook 'emacs-lisp-mode-hook 'highlight-indentation-current-column-mode)
-(add-hook 'js2-mode-hook 'highlight-indentation-current-column-mode)
-(add-hook 'js2-jsx-mode-hook 'highlight-indentation-current-column-mode)
+(use-package highlight-indentation
+  :ensure t
+  :config
+  ;; (set-face-background 'highlight-indentation-face "#40483e")  ; 色の指定
+  (add-hook 'python-mode-hook 'highlight-indentation-current-column-mode)
+  (add-hook 'yaml-mode-hook 'highlight-indentation-current-column-mode)
+  (add-hook 'emacs-lisp-mode-hook 'highlight-indentation-current-column-mode)
+  (add-hook 'js2-mode-hook 'highlight-indentation-current-column-mode)
+  (add-hook 'js2-jsx-mode-hook 'highlight-indentation-current-column-mode))
 
 ;;; コメントアウト
-(el-get-bundle comment-dwim-2)
-(autoload 'comment-dwim-2 "comment-dwim-2")
-(setq comment-dwim-2--inline-comment-behavior 'reindent-comment)
-(global-set-key (kbd "M-;") 'comment-dwim-2)
+(use-package comment-dwim-2
+  :ensure t
+  :config
+  (autoload 'comment-dwim-2 "comment-dwim-2")
+  (setq comment-dwim-2--inline-comment-behavior 'reindent-comment)
+  (global-set-key (kbd "M-;") 'comment-dwim-2))
 
 ;;; ペインの回転
-(el-get-bundle daichirata/emacs-rotate)
-(autoload 'rotate "rotate")
-(global-set-key (kbd "M-o") 'rotate-layout)
-(global-set-key (kbd "C-x C-o") 'rotate-window)
+(use-package rotate
+  :ensure t
+  :config
+  (autoload 'rotate "rotate")
+  (global-set-key (kbd "M-o") 'rotate-layout)
+  (global-set-key (kbd "C-x C-o") 'rotate-window))
 
 ;;; 検索・置換機能の拡張
-(el-get-bundle anzu)
-(autoload 'anzu "anzu")
-(global-anzu-mode +1)
-(setq anzu-search-threshold 1000)
-(setq anzu-minimum-input-length 3)
-(global-set-key (kbd "C-c r") 'anzu-query-replace)
-(global-set-key (kbd "C-c R") 'anzu-query-replace-regexp)
+(use-package anzu
+  :ensure t
+  :diminish anzu
+  :config
+  (autoload 'anzu "anzu")
+  (global-anzu-mode +1)
+  (setq anzu-search-threshold 1000)
+  (setq anzu-minimum-input-length 3)
+  (global-set-key (kbd "C-c r") 'anzu-query-replace)
+  (global-set-key (kbd "C-c R") 'anzu-query-replace-regexp))
 
 ;;; 選択範囲を拡張
-(el-get-bundle expand-region)
-(autoload 'expand-region "expand-region")
-(global-set-key (kbd "C-\]") 'er/expand-region)      ; リージョンを広げる
-(global-set-key (kbd "C-M-\]") 'er/contract-region)  ; リージョンを狭める
+(use-package expand-region
+  :ensure t
+  :config
+  (autoload 'expand-region "expand-region")
+  (global-set-key (kbd "C-\]") 'er/expand-region)       ; リージョンを広げる
+  (global-set-key (kbd "C-M-\]") 'er/contract-region))  ; リージョンを狭める
 
 ;;; 複数カーソル
-(el-get-bundle multiple-cursors)
-(autoload 'multiple-cursors "multiple-cursors")
+(use-package multiple-cursors
+  :ensure t
+  :config
+  (autoload 'multiple-cursors "multiple-cursors"))
 
 ;;; prefixによる連続操作のキーバインド設定
-(el-get-bundle smartrep)
-(require 'smartrep)
-(global-set-key "\C-t" nil)
-(smartrep-define-key
-    global-map "C-t" '(("C-n" . 'mc/mark-next-like-this)
-                       ("C-p" . 'mc/mark-previous-like-this)
-                       ("C-u" . 'mc/unmark-next-like-this)
-                       ("C-s" . 'mc/skip-to-next-like-this)
-                       ("*"   . 'mc/mark-all-like-this)
-                       ))
+(use-package smartrep
+  :ensure t
+  :config
+  (global-set-key "\C-t" nil)
+  (smartrep-define-key
+      global-map "C-t" '(("C-n" . 'mc/mark-next-like-this)
+                         ("C-p" . 'mc/mark-previous-like-this)
+                         ("C-u" . 'mc/unmark-next-like-this)
+                         ("C-s" . 'mc/skip-to-next-like-this)
+                         ("*"   . 'mc/mark-all-like-this))))
 
 ;;; helm
-(el-get-bundle helm)            ; helm本体
-(el-get-bundle helm-descbinds)  ; helmでキーバインドを表示
-(el-get-bundle helm-ls-git)     ; gitプロジェクト内の全ファイル検索
-(autoload 'helm-config "helm-config")
-(autoload 'helm-descbinds "helm-descbinds")
-(autoload 'helm-ls-git "helm-ls-git")
-(helm-mode 1)
+;; helm本体
+(use-package helm-config
+  :ensure helm
+  :diminish helm-mode
+  :config
+  (helm-mode 1)
+  ;; helm用キーバインド
+  (define-key helm-map (kbd "C-h") 'delete-backward-char)
+  (define-key helm-find-files-map (kbd "C-h") 'delete-backward-char)
+  (define-key helm-find-files-map (kbd "TAB") 'helm-execute-persistent-action)
+  (define-key helm-read-file-map (kbd "TAB") 'helm-execute-persistent-action)
+  (global-set-key (kbd "M-y") 'helm-show-kill-ring)
+  (global-set-key (kbd "M-x") 'helm-M-x)
+  (define-key global-map (kbd "C-c i")   'helm-imenu)
+  (define-key global-map (kbd "C-x C-f") 'helm-find-files)
+  (define-key global-map (kbd "C-x b") 'helm-for-files)
+  (define-key global-map (kbd "C-c g") 'helm-grep-do-git-grep)
 
-;; helm用キーバインド
-(define-key helm-map (kbd "C-h") 'delete-backward-char)
-(define-key helm-find-files-map (kbd "C-h") 'delete-backward-char)
-(define-key helm-find-files-map (kbd "TAB") 'helm-execute-persistent-action)
-(define-key helm-read-file-map (kbd "TAB") 'helm-execute-persistent-action)
-(global-set-key (kbd "M-y") 'helm-show-kill-ring)
-(global-set-key (kbd "M-x") 'helm-M-x)
-(define-key global-map (kbd "C-c i")   'helm-imenu)
-(define-key global-map (kbd "C-x C-f") 'helm-find-files)
-(define-key global-map (kbd "C-x b") 'helm-for-files)
-(define-key global-map (kbd "C-c g") 'helm-grep-do-git-grep)
+  ;; TABでnew bufferが作成しない(ファイルがない時は何もしない)
+  (defadvice helm-ff-kill-or-find-buffer-fname (around execute-only-if-exist activate)
+    "Execute command only if CANDIDATE exists"
+    (when (file-exists-p candidate)
+      ad-do-it))
 
-;; helm-descbinds用キーバインド
-(global-set-key (kbd "C-c b") 'helm-descbinds)
+  ;; helm-buffers-list の詳細情報を非表示
+  (setq helm-buffer-details-flag nil))
 
-;; helm-ls-git用キーバインド
-(global-set-key (kbd "C-c l") 'helm-ls-git-ls)
 
-;; TABでnew bufferが作成しない(ファイルがない時は何もしない)
-(defadvice helm-ff-kill-or-find-buffer-fname (around execute-only-if-exist activate)
-  "Execute command only if CANDIDATE exists"
-  (when (file-exists-p candidate)
-    ad-do-it))
+;; helmでキーバインドを表示
+(use-package helm-descbinds
+  :ensure
+  :config
+  ;; helm-descbinds用キーバインド
+  (global-set-key (kbd "C-c b") 'helm-descbinds))
 
-;; helm-buffers-list の詳細情報を非表示
-(setq helm-buffer-details-flag nil)
+
+;; gitプロジェクト内の全ファイル検索
+(use-package helm-ls-git
+  :ensure
+  :config
+  (autoload 'helm-descbinds "helm-descbinds")
+  (autoload 'helm-ls-git "helm-ls-git")
+  ;; helm-ls-git用キーバインド
+  (global-set-key (kbd "C-c l") 'helm-ls-git-ls))
+
 
 ;;; company (補完機能)
-(el-get-bundle company-mode)
-;; (require 'company)
-(autoload 'company "company")
+(use-package company
+  :ensure
+  :config
+  (autoload 'company "company")
+  ;; 基本設定
+  (global-company-mode)                   ; 全バッファでcompanyを有効にする
+  (setq company-idle-delay 0)             ; デフォルトは0.5
+  (setq company-minimum-prefix-length 2)  ; デフォルトは4
+  (setq company-selection-wrap-around t)  ; 一番下の候補で下を押すと最初に戻る
+  (setq company-dabbrev-downcase nil)     ; lowercaseで補完される機能の停止
 
-;; 基本設定
-(global-company-mode)                   ; 全バッファでcompanyを有効にする
-(setq company-idle-delay 0)             ; デフォルトは0.5
-(setq company-minimum-prefix-length 2)  ; デフォルトは4
-(setq company-selection-wrap-around t)  ; 一番下の候補で下を押すと最初に戻る
-(setq company-dabbrev-downcase nil)     ; lowercaseで補完される機能の停止
+  ;; 不要なキーバインドを解除
+  (define-key company-active-map (kbd "M-n") nil)
+  (define-key company-active-map (kbd "M-p") nil)
 
-;; 不要なキーバインドを解除
-(define-key company-active-map (kbd "M-n") nil)
-(define-key company-active-map (kbd "M-p") nil)
+  ;; C-M-i で手動補完
+  (global-set-key (kbd "C-M-i") 'company-complete)
 
-;; C-M-i で手動補完
-(global-set-key (kbd "C-M-i") 'company-complete)
+  ;; 関数のドキュメントをミニバッファに表示
+  (define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
 
-;; 関数のドキュメントをミニバッファに表示
-(define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
+  ;; C-n, C-pで補完候補を次/前の候補を選択
+  (define-key company-active-map (kbd "C-n") 'company-select-next)
+  (define-key company-active-map (kbd "C-p") 'company-select-previous)
+  (define-key company-search-map (kbd "C-n") 'company-select-next)
+  (define-key company-search-map (kbd "C-p") 'company-select-previous)
 
-;; C-n, C-pで補完候補を次/前の候補を選択
-(define-key company-active-map (kbd "C-n") 'company-select-next)
-(define-key company-active-map (kbd "C-p") 'company-select-previous)
-(define-key company-search-map (kbd "C-n") 'company-select-next)
-(define-key company-search-map (kbd "C-p") 'company-select-previous)
+  ;; 候補が1つならばtabで補完、複数候補があればtabで次の候補へ行く
+  (define-key company-active-map (kbd "C-i") 'company-complete-common-or-cycle)
 
-;; 候補が1つならばtabで補完、複数候補があればtabで次の候補へ行く
-(define-key company-active-map (kbd "C-i") 'company-complete-common-or-cycle)
+  ;; デフォルトではdocumentに移動できないのでcompany-doc-bufferを固定する
+  (defun my/company-show-doc-buffer ()
+    "Temporarily show the documentation buffer for the selection."
+    (interactive)
+    (let* ((selected (nth company-selection company-candidates))
+           (doc-buffer (or (company-call-backend 'doc-buffer selected)
+                           (error "No documentation available"))))
+      (with-current-buffer doc-buffer
+        (goto-char (point-min)))
+      (display-buffer doc-buffer t)))
+  (define-key company-active-map (kbd "M-d") #'my/company-show-doc-buffer)
 
-;; デフォルトではdocumentに移動できないのでcompany-doc-bufferを固定する
-(defun my/company-show-doc-buffer ()
-  "Temporarily show the documentation buffer for the selection."
-  (interactive)
-  (let* ((selected (nth company-selection company-candidates))
-         (doc-buffer (or (company-call-backend 'doc-buffer selected)
-                         (error "No documentation available"))))
-    (with-current-buffer doc-buffer
-      (goto-char (point-min)))
-    (display-buffer doc-buffer t)))
-(define-key company-active-map (kbd "M-d") #'my/company-show-doc-buffer)
-
-;; 関数のドキュメントをポップアップ表示(terminal上では動作しない)
-;; (el-get-bundle company-quickhelp)
-;; (el-get-bundle pos-tip)
-;; (require 'company-quickhelp)
-;; (company-quickhelp-mode 1)
+  ;; 関数のドキュメントをポップアップ表示(terminal上では動作しない)
+  ;; (el-get-bundle company-quickhelp)
+  ;; (el-get-bundle pos-tip)
+  ;; (require 'company-quickhelp)
+  ;; (company-quickhelp-mode 1)
+  )
 
 
 ;;; flycheck (シンタックスチェック)
-(el-get-bundle flycheck)
-(autoload 'flycheck "flycheck")
-(global-flycheck-mode)
+(use-package flycheck
+  :ensure t
+  :config
+  (autoload 'flycheck "flycheck")
+  (global-flycheck-mode)
 
-;; 保存時に自動チェック
-(setq flycheck-check-syntax-automatically '(mode-enabled save))
+  ;; 保存時に自動チェック
+  (setq flycheck-check-syntax-automatically '(mode-enabled save))
 
-;; キーバインド
-;; (define-key global-map (kbd "C-c n") 'flycheck-next-error)
-;; (define-key global-map (kbd "C-c p") 'flycheck-previous-error)
-;; (define-key global-map (kbd "C-c l") 'flycheck-list-errors)
-(define-key global-map (kbd "M-g l") 'flycheck-list-errors)
+  ;; キーバインド
+  ;; (define-key global-map (kbd "C-c n") 'flycheck-next-error)
+  ;; (define-key global-map (kbd "C-c p") 'flycheck-previous-error)
+  ;; (define-key global-map (kbd "C-c l") 'flycheck-list-errors)
+  (define-key global-map (kbd "M-g l") 'flycheck-list-errors))
 
 
 ;;; markdown
-(el-get-bundle markdown-mode)
-(autoload 'markdown-mode "markdown-mode"
-  "major mode for editing Markdown files" t)
-(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
-(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
-(autoload 'gfm-mode "gfm-mode"
-  "Major mode for editing GitHub Flavored Markdown files" t)
-(add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode))
+(use-package markdown-mode
+  :ensure t
+  :config
+  (autoload 'markdown-mode "markdown-mode"
+    "major mode for editing Markdown files" t)
+  (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+  (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+  (autoload 'gfm-mode "gfm-mode"
+    "Major mode for editing GitHub Flavored Markdown files" t)
+  (add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode)))
 
 
 ;;; yaml
-(el-get-bundle yaml-mode)
-(add-to-list 'auto-mode-alist '("\\.raml\\'" . yaml-mode))
+(use-package yaml-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.raml\\'" . yaml-mode)))
 
 
 ;;; json
-(el-get-bundle json-mode)
-;; (add-to-list 'auto-mode-alist '("\\.json\\'" . json-mode))
+(use-package json-mode
+   :ensure t
+  :config
+  ;; (add-to-list 'auto-mode-alist '("\\.json\\'" . json-mode))
+  )
 
 
 ;;; docker
-(el-get-bundle dockerfile-mode)
+(use-package dockerfile-mode
+  :ensure t)
 
 
 ;;; JavaScript
-(el-get-bundle js2-mode)
-(el-get-bundle company-tern)
-(autoload 'js2-mode "js2-mode" nil t)
-(add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
-;; (add-to-list 'auto-mode-alist '("\\.js$" . js2-jsx-mode))
-(eval-after-load 'flycheck
-  '(custom-set-variables
-    '(flycheck-disabled-checkers '(javascript-jshint javascript-jscs))
-    ))
+(use-package js2-mode
+  :ensure t)
+
+(use-package company-tern
+  :ensure t
+  :config
+  (autoload 'js2-mode "js2-mode" nil t)
+  (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
+  ;; (add-to-list 'auto-mode-alist '("\\.js$" . js2-jsx-mode))
+  (eval-after-load 'flycheck
+    '(custom-set-variables
+      '(flycheck-disabled-checkers '(javascript-jshint javascript-jscs))
+      )))
 
 (add-hook 'js-mode-hook
           (lambda ()
@@ -435,15 +500,17 @@
 
 ;;; Python
 ;; (el-get-bundle jedi)
-(el-get-bundle company-jedi)
-(el-get-bundle py-autopep8)
-(el-get-bundle yasnippet)
+(use-package company-jedi
+  :ensure t)
+(use-package py-autopep8
+  :ensure t)
+(use-package yasnippet
+  :ensure t)
 
 (add-hook 'python-mode-hook
           '(lambda()
              ;; 関数補完 (company-jedi)
              (require 'jedi-core)
-             ;; (jedi:setup)
              (setq jedi:complete-on-dot t)
              (setq jedi:use-shortcuts t)
              (add-to-list 'company-backends 'company-jedi) ; backendに追加
@@ -483,3 +550,21 @@
              ))
 
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("2da65cb7074c176ca0a33f06bcc83ef692c9175e41b6370f5e94eb5811d6ee3a" "eea01f540a0f3bc7c755410ea146943688c4e29bea74a29568635670ab22f9bc" default)))
+ '(flycheck-disabled-checkers (quote (javascript-jshint javascript-jscs)))
+ '(package-selected-packages
+   (quote
+    (yasnippet yaml-mode use-package smartrep rotate py-autopep8 multiple-cursors monokai-theme monokai-alt-theme markdown-mode json-mode js2-mode highlight-symbol highlight-indentation helm-ls-git helm-descbinds flycheck expand-region exec-path-from-shell dockerfile-mode company-tern company-jedi comment-dwim-2 anzu))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
