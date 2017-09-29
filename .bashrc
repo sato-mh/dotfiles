@@ -20,6 +20,12 @@ case "${OSTYPE}" in
 	      alias ll="ls -lah --color=auto"
 	      alias ls="ls --color=auto"
 	      ;;
+    msys*)
+        alias l="ls -lh --color=auto"
+	    alias l.="ls -lh -d .* --color=auto"
+	    alias ll="ls -lah --color=auto"
+	    alias ls="ls --color=auto"
+	    ;;
 esac
 alias e="emacsclient -nw"
 alias ekill='emacsclient -e "(kill-emacs)"'
