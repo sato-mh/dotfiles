@@ -22,6 +22,7 @@ case "${OSTYPE}" in
 	      ;;
 esac
 alias e="emacsclient -nw"
+alias ekill='emacsclient -e "(kill-emacs)"'
 alias grep="grep --color"
 alias gopath="cd $GOPATH"
 alias sudo="sudo -E"
