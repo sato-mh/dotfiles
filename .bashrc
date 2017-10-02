@@ -88,6 +88,10 @@ function promps {
 }
 promps
 
+if [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+fi
+
 # pyenv
 export PYENV_ROOT="${HOME}/.pyenv"
 if [ -d "${PYENV_ROOT}" ]; then
