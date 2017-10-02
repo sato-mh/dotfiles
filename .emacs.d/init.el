@@ -23,10 +23,7 @@
         (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
             (normal-top-level-add-subdirs-to-load-path))))))
 
-;;; ディレクトリをサブディレクトリごとload-pathに追加
-;;; (add-to-load-path "elpa" "elisp")
-
-;; package.elの保存先とリポジトリの追加
+;;; package.elの保存先とリポジトリの追加
 (setq package-user-dir "~/.emacs.d/elisp/elpa/")
 (setq package-archives
       '(("gnu"   . "http://elpa.gnu.org/packages/")
@@ -34,26 +31,13 @@
         ("org"   . "http://orgmode.org/elpa/")))
 (package-initialize)
 
-;; use-packageをと必須パッケージを自動インストール
+;;; use-packageをと必須パッケージを自動インストール
 (when (not (package-installed-p 'use-package))
   (package-refresh-contents)
   (package-install 'use-package))
 (require 'use-package)
 (require 'bind-key)
 (require 'diminish)
-
-
-;;; el-getの設定
-(add-to-list 'load-path (locate-user-emacs-file "el-get"))
-(require 'el-get)
-
-;; el-getでダウンロードしたパッケージは ~/.emacs.d/elisp に入るようにする
-(setq el-get-dir (locate-user-emacs-file "~/.emacs.d/elisp"))
-
-;;; emacs の起動速度可視化
-;; (require 'initchart)
-;; (initchart-record-execution-time-of load file)
-;; (initchart-record-execution-time-of require feature)
 
 ;;; 環境を日本語、UTF-8にする
 (set-language-environment "Japanese")
@@ -188,7 +172,7 @@
 ;;;
 
 ;;; dired-x を使用
-(autoload 'dired-x "dired-x")
+(require 'dired-x)
 
 ;;; dired-find-alternate-file の有効化
 (put 'dired-find-alternate-file 'disabled nil)
