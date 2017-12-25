@@ -1,0 +1,48 @@
+---
+- name: Set hostname
+  hostname: name=develop
+
+- name: Install apt packages
+  apt: name={{ item }} state=latest update_cache=yes
+  become: yes
+  with_items:
+    # Base
+    - build-essential
+    - curl
+    - git
+    - git-flow
+    - jq
+    - less
+    - tmux
+    - tig
+    - unzip
+    - vim
+    - wget
+    # For bash
+    - bash_completion
+    # For ping
+    - iputils-ping
+    # For updatedb
+    - mlocate
+    # For autotools
+    - autoconf
+    - automake
+    - libtool
+
+- name: Clone dotfiles
+  git: repo=https://github.com/sato-mh/dotfiles.git dest=~/.dotfiles
+
+- name: Set symbolic links
+  shell: "bash ~/.dotfiles/set-symbolic-links.sh"
+
+- name: Configure git username
+  shell: "git config --global user.name {{ git_user }}"
+
+- name: Configure git email
+  shell: "git config --global user.email {{ git_email }}"
+
+- name: Configure git editor
+  shell: "git config --global core.editor {{ git_editor }}"
+
+- name: Configure git excludesfile
+  shell: "git config --global core.excludesfile '~/.gitignore'"

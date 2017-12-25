@@ -1,0 +1,16 @@
+[localhost]
+127.0.0.1 ansible_connection=local
+
+[localhost:vars]
+git_user=
+git_email=
+git_editor=emacs
+docker_user_name=ubuntu
+docker_os_version=xenial
+dockercompose_version=1.18.0
+python_version=3.6.4
+ruby_version=2.4.2
+node_version=8.9.3
+go_version=1.9.2
+
+
