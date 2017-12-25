@@ -1,0 +1,78 @@
+---
+
+- name: Git clone anyenv
+  git: repo="https://github.com/riywo/anyenv" dest="~/.anyenv"
+
+- name: Install pyenv, rbenv, ndenv, goenv
+  shell: >
+    eval "$(anyenv init -)";
+    anyenv install -f {{ item }}
+  environment:
+    PATH: "~/.anyenv/bin:{{ lookup('env', 'PATH') }}"
+  with_items:
+    - pyenv
+    - rbenv
+    - ndenv
+    - goenv
+
+- name: Install python build deps
+  apt: name={{ item }} state=latest update_cache=yes
+  become: yes
+  with_items:
+    - zlib1g-dev
+    - libssl-dev
+    - libbz2-dev
+    - libreadline-dev
+    - libsqlite3-dev
+
+- name: Check python installed
+  stat: path=~/.anyenv/envs/pyenv/versions/"{{ python_version }}"
+  register: python_dir
+
+- name: Install python "{{ python_version }}"
+  shell: >
+    source ~/.bashrc &&
+    pyenv install {{ python_version }} &&
+    pyenv global {{ python_version }}
+  args:
+    executable: /usr/bin/bash
+  when: not python_dir.stat.exists
+
+- name: Check ruby installed
+  stat: path=~/.anyenv/envs/rbenv/versions/"{{ ruby_version }}"
+  register: ruby_dir
+
+- name: Install Ruby "{{ ruby_version }}"
+  shell: >
+    source ~/.bashrc &&
+    rbenv install {{ ruby_version }} &&
+    rbenv global {{ ruby_version }}
+  args:
+    executable: /usr/bin/bash
+  when: not ruby_dir.stat.exists
+
+- name: Check nodejs installed
+  stat: path=~/.anyenv/envs/ndenv/versions/"{{ node_version }}"
+  register: nodejs_dir
+
+- name: Install Nodejs "{{ node_version }}"
+  shell: >
+    source ~/.bashrc &&
+    ndenv install {{ node_version }} &&
+    ndenv global {{ node_version }}
+  args:
+    executable: /usr/bin/bash
+  when: not nodejs_dir.stat.exists
+
+- name: Check golang installed
+  stat: path=~/.anyenv/envs/goenv/versions/"{{ go_version }}"
+  register: golang_dir
+
+- name: Install Golang "{{ go_version }}"
+  shell: >
+    source ~/.bashrc &&
+    goenv install {{ go_version }} &&
+    goenv global {{ go_version }}
+  args:
+    executable: /usr/bin/bash
+  when: not golang_dir.stat.exists

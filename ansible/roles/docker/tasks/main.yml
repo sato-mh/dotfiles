@@ -1,0 +1,33 @@
+---
+
+- name: Install apt packages for installing docker
+  apt: name={{ item }} state=latest update_cache=yes
+  become: yes
+  with_items:
+    - apt-transport-https
+    - ca-certificates
+    - software-properties-common
+
+- name: Add docker official apt key
+  apt_key: url=https://download.docker.com/linux/ubuntu/gpg state=present
+  become: yes
+
+- name: Add docker apt repository
+  apt_repository: repo="deb [arch=amd64] https://download.docker.com/linux/ubuntu `lsb_release -cs` stable" state=present
+  become: yes
+
+- name: Install docker-ce
+  apt: name=docker-ce state=latest update_cache=yes
+  become: yes
+
+- name: Add user to docker group
+  user: name="{{ user_name }}" groups=docker
+  become: yes
+
+- name: Fetch docker-compose binary
+  shell: "curl -L https://github.com/docker/compose/releases/download/{{ dockercompose_version }}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose"
+  become: yes
+
+- name: Change permission of docker-compose
+  file: path=/usr/local/bin/docker-compose mode=755
+  become: yes
