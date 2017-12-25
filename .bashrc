@@ -27,8 +27,6 @@ case "${OSTYPE}" in
 	    alias ls="ls --color=auto"
 	    ;;
 esac
-alias e="emacsclient -nw"
-alias ekill='emacsclient -e "(kill-emacs)"'
 alias grep="grep --color"
 alias gopath="cd $GOPATH"
 alias sudo="sudo -E"
@@ -37,6 +35,18 @@ alias git-rm-merged-branch="git branch --merged master | grep -vE '^\*|master$|d
 alias git-rm-remote-merged-branach="git branch -r --merged master | grep -v -e master -e develop | sed -e 's% *origin/%%' | xargs -I% git push --delete origin %"
 alias docker-rm-all-container="docker ps -a -q | xargs docker rm -f"
 alias docker-run-with-my-env="docker run -it -v ~/dotfiles:/root/dotfiles -v ~/projects/:/root/projects -v ~/.pyenv:/root/.pyenv"
+
+# emacs
+function estart() {
+  if ! emacsclient -e 0 > /dev/null 2>&1; then
+          cd > /dev/null 2>&1
+    emacs --daemon
+    cd - > /dev/null 2>&1
+  fi
+}
+alias e='estart && emacsclient -nw'
+alias ekill="emacsclient -e '(kill-emacs)'"
+export EDITOR=e
 
 # undef default keybind
 stty stop undef
