@@ -46,7 +46,7 @@ function estart() {
 }
 alias e='estart && emacsclient -nw'
 alias ekill="emacsclient -e '(kill-emacs)'"
-export EDITOR=e
+export EDITOR=emacs
 
 # undef default keybind
 stty stop undef
