@@ -13,7 +13,7 @@
   become: yes
 
 - name: Add docker apt repository
-  apt_repository: repo="deb [arch=amd64] https://download.docker.com/linux/ubuntu `lsb_release -cs` stable" state=present
+  apt_repository: repo="deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable" state=present
   become: yes
 
 - name: Install docker-ce
@@ -21,11 +21,12 @@
   become: yes
 
 - name: Add user to docker group
-  user: name="{{ user_name }}" groups=docker
+  user: name="{{ docker_user_name }}" groups=docker
   become: yes
 
 - name: Fetch docker-compose binary
-  shell: "curl -L https://github.com/docker/compose/releases/download/{{ dockercompose_version }}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose"
+  shell: "curl -L https://github.com/docker/compose/releases/download/{{ dockercompose_version }}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin\
+/docker-compose"
   become: yes
 
 - name: Change permission of docker-compose

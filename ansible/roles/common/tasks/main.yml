@@ -1,6 +1,4 @@
 ---
-- name: Set hostname
-  hostname: name=develop
 
 - name: Install apt packages
   apt: name={{ item }} state=latest update_cache=yes
@@ -19,7 +17,7 @@
     - vim
     - wget
     # For bash
-    - bash_completion
+    - bash-completion
     # For ping
     - iputils-ping
     # For updatedb
