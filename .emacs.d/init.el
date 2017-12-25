@@ -37,7 +37,8 @@
   (package-install 'use-package))
 (require 'use-package)
 (require 'bind-key)
-(require 'diminish)
+(use-package diminish
+  :ensure t)
 
 ;;; 環境を日本語、UTF-8にする
 (set-language-environment "Japanese")
@@ -190,8 +191,11 @@
 ;;; キーバインド設定
 ;;;
 
+;;; 前の文字を削除
+(define-key key-translation-map (kbd "C-h") (kbd "<DEL>"))
+
 ;;; 前の単語を削除
-(global-set-key "\M-h" 'backward-kill-word)
+(global-set-key (kbd "M-h") 'backward-kill-word)
 
 ;;; ペインの移動
 (global-set-key (kbd "\C-c C-b")  'windmove-left)
