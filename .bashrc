@@ -102,24 +102,12 @@ if [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
 
-# pyenv
-export PYENV_ROOT="${HOME}/.pyenv"
-if [ -d "${PYENV_ROOT}" ]; then
-    export PATH=${PYENV_ROOT}/bin:$PATH
-    export PYENV_VIRTUALENV_DISABLE_PROMPT=1
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
+# anyenv
+if [ -d $HOME/.anyenv ]
+then
+    export PATH="$HOME/.anyenv/bin:$PATH"
+    eval "$(anyenv init -)"
 fi
-
-# nvm
-if [[ -s ~/.nvm/nvm.sh ]];
- then source ~/.nvm/nvm.sh
-fi
-
-# GVM
-# export PATH=$PATH:$HOME/.gvm/bin
-# [[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
-# gvm use go1.5.3    
 
 # mysql by docker
 export MYSQL_HOST=0.0.0.0
