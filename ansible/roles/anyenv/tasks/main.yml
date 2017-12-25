@@ -5,10 +5,10 @@
 
 - name: Install pyenv, rbenv, ndenv, goenv
   shell: >
-    eval "$(anyenv init -)";
+    source ~/.bashrc &&
     anyenv install -f {{ item }}
-  environment:
-    PATH: "~/.anyenv/bin:{{ lookup('env', 'PATH') }}"
+  args:
+    executable: /bin/bash
   with_items:
     - pyenv
     - rbenv
@@ -29,13 +29,17 @@
   stat: path=~/.anyenv/envs/pyenv/versions/"{{ python_version }}"
   register: python_dir
 
+- name: Check python installed
+  stat: path=~/.anyenv/envs/pyenv/versions/"{{ python_version }}"
+  register: python_dir
+
 - name: Install python "{{ python_version }}"
   shell: >
     source ~/.bashrc &&
     pyenv install {{ python_version }} &&
     pyenv global {{ python_version }}
   args:
-    executable: /usr/bin/bash
+    executable: /bin/bash
   when: not python_dir.stat.exists
 
 - name: Check ruby installed
@@ -48,7 +52,7 @@
     rbenv install {{ ruby_version }} &&
     rbenv global {{ ruby_version }}
   args:
-    executable: /usr/bin/bash
+    executable: /bin/bash
   when: not ruby_dir.stat.exists
 
 - name: Check nodejs installed
@@ -61,7 +65,7 @@
     ndenv install {{ node_version }} &&
     ndenv global {{ node_version }}
   args:
-    executable: /usr/bin/bash
+    executable: /bin/bash
   when: not nodejs_dir.stat.exists
 
 - name: Check golang installed
@@ -74,5 +78,5 @@
     goenv install {{ go_version }} &&
     goenv global {{ go_version }}
   args:
-    executable: /usr/bin/bash
+    executable: /bin/bash
   when: not golang_dir.stat.exists
