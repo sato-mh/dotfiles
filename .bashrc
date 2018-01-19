@@ -22,10 +22,10 @@ case "${OSTYPE}" in
 	      ;;
     msys*)
         alias l="ls -lh --color=auto"
-	    alias l.="ls -lh -d .* --color=auto"
-	    alias ll="ls -lah --color=auto"
-	    alias ls="ls --color=auto"
-	    ;;
+	      alias l.="ls -lh -d .* --color=auto"
+	      alias ll="ls -lah --color=auto"
+	      alias ls="ls --color=auto"
+	      ;;
 esac
 alias grep="grep --color"
 alias gopath="cd $GOPATH"
@@ -94,7 +94,7 @@ function promps {
         *)      TITLEBAR="";;
     esac
     local BASE="\u@\h"
-    PS1="${TITLEBAR}${LIGHT_RED}${BASE}${WHITE}:${YELLOW}\W${LIGHT_GREEN}\$(parse_git_branch)\n${YELLOW}\$${WHITE} "
+    PS1="${TITLEBAR}${LIGHT_RED}${BASE}${WHITE}:${YELLOW}\W${LIGHT_GREEN}$(parse_git_branch)\n${YELLOW}\$${WHITE} "
 }
 promps
 
