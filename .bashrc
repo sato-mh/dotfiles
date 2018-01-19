@@ -94,11 +94,16 @@ function promps {
         *)      TITLEBAR="";;
     esac
     local BASE="\u@\h"
-    PS1="${TITLEBAR}${LIGHT_RED}${BASE}${WHITE}:${YELLOW}\W${LIGHT_GREEN}\$(parse_git_branch)${YELLOW}\$${WHITE} "
+    PS1="${TITLEBAR}${LIGHT_RED}${BASE}${WHITE}:${YELLOW}\W${LIGHT_GREEN}\$(parse_git_branch)\n${YELLOW}\$${WHITE} "
 }
 promps
 
-if [ -f /etc/bash_completion ]; then
+# bash-completion
+if [ -f /usr/local/share/bash-completion/bash_completion ]; then
+    . /usr/local/share/bash-completion/bash_completion
+elif [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+elif [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
 
@@ -111,3 +116,6 @@ fi
 
 # mysql by docker
 export MYSQL_HOST=0.0.0.0
+
+# run ssh-agent
+eval `ssh-agent` 1> /dev/null
