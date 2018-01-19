@@ -1,7 +1,10 @@
 ---
 
 - name: Install apt packages
-  apt: name={{ item }} state=latest update_cache=yes
+  apt:
+    name: {{ item }}
+    state: latest
+    update_cache: yes
   become: yes
   with_items:
     # Base
@@ -28,7 +31,9 @@
     - libtool
 
 - name: Clone dotfiles
-  git: repo=https://github.com/sato-mh/dotfiles.git dest=~/.dotfiles
+  git:
+    repo: "https://github.com/sato-mh/dotfiles.git"
+    dest: "~/.dotfiles"
 
 - name: Set symbolic links
   shell: "bash ~/.dotfiles/set-symbolic-links.sh"
@@ -44,3 +49,45 @@
 
 - name: Configure git excludesfile
   shell: "git config --global core.excludesfile '~/.gitignore'"
+
+- name: Make directory for src
+  file:
+    path: "~/src"
+    state: directory
+    mode: 0755
+
+- name: Git Clone bash-completion
+  git:
+    repo: "https://github.com/scop/bash-completion.git"
+    dest: "~/src/bash-completion"
+
+- name: Prepare installation of bash-completion
+  shell: "autoreconf -i && ./configure && make"
+  args:
+    chdir: "~/src/bash-completion"
+
+- name: Install bash-completion
+  become: yes
+  shell: "make install"
+  args:
+    chdir: "~/src/bash-completion"
+
+- name: Download openssh-7.6p1
+  shell: "wget http://ftp.jaist.ac.jp/pub/OpenBSD/OpenSSH/portable/openssh-7.6p1.tar.gz"
+
+- name: Unarchive openssh-7.6p1
+  unarchive:
+      src: "~/src/openssh-7.6p1.tar.gz"
+      dest: "~/src/openssh-7.6p1"
+      remote_src: yes
+
+- name: Prepare installation of openssh-7.6p1
+  shell: "./configure && make"
+  args:
+    chdir: "~/src/openssh-7.6p1"
+
+- name: install openssh-7.6p1
+  become: yes
+  shell: "make install"
+  args:
+    chdir: "~/src/openssh-7.6p1"
