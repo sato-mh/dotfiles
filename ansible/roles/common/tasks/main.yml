@@ -2,7 +2,7 @@
 
 - name: Install apt packages
   apt:
-    name: {{ item }}
+    name: "{{ item }}"
     state: latest
     update_cache: yes
   become: yes
@@ -14,11 +14,13 @@
     - git-flow
     - jq
     - less
+    - libssl-dev
     - tmux
     - tig
     - unzip
     - vim
     - wget
+    - zlib1g-dev
     # For bash
     - bash-completion
     # For ping
@@ -74,11 +76,13 @@
 
 - name: Download openssh-7.6p1
   shell: "wget http://ftp.jaist.ac.jp/pub/OpenBSD/OpenSSH/portable/openssh-7.6p1.tar.gz"
+  args:
+    chdir: "~/src"
 
 - name: Unarchive openssh-7.6p1
   unarchive:
       src: "~/src/openssh-7.6p1.tar.gz"
-      dest: "~/src/openssh-7.6p1"
+      dest: "~/src"
       remote_src: yes
 
 - name: Prepare installation of openssh-7.6p1
