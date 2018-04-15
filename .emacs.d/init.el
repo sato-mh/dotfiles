@@ -191,6 +191,10 @@
 ;;; キーバインド設定
 ;;;
 
+;;; 前の文字を削除
+;; (global-set-key "\C-h" 'backward-delete-char)
+(define-key key-translation-map (kbd "C-h") (kbd "<DEL>"))
+
 ;;; 前の単語を削除
 (global-set-key "\M-h" 'backward-kill-word)
 
