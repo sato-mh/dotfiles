@@ -37,14 +37,14 @@
   (package-install 'use-package))
 (require 'use-package)
 (require 'bind-key)
-(require 'diminish)
+(use-package diminish
+  :ensure t)
 
 ;;; 環境を日本語、UTF-8にする
 (set-language-environment "Japanese")
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (set-buffer-file-coding-system 'utf-8)
-(setq default-buffer-file-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
 (prefer-coding-system 'utf-8)
 
@@ -196,7 +196,7 @@
 (define-key key-translation-map (kbd "C-h") (kbd "<DEL>"))
 
 ;;; 前の単語を削除
-(global-set-key "\M-h" 'backward-kill-word)
+(global-set-key (kbd "M-h") 'backward-kill-word)
 
 ;;; ペインの移動
 (global-set-key (kbd "\C-c C-b")  'windmove-left)
@@ -339,7 +339,7 @@
 
 ;; helmでキーバインドを表示
 (use-package helm-descbinds
-  :ensure
+  :ensure t
   :config
   ;; helm-descbinds用キーバインド
   (global-set-key (kbd "C-c b") 'helm-descbinds))
@@ -347,7 +347,7 @@
 
 ;; gitプロジェクト内の全ファイル検索
 (use-package helm-ls-git
-  :ensure
+  :ensure t
   :config
   (autoload 'helm-descbinds "helm-descbinds")
   (autoload 'helm-ls-git "helm-ls-git")
@@ -357,7 +357,7 @@
 
 ;;; company (補完機能)
 (use-package company
-  :ensure
+  :ensure t
   :config
   (autoload 'company "company")
   ;; 基本設定
@@ -410,7 +410,6 @@
 (use-package flycheck
   :ensure t
   :config
-  (autoload 'flycheck "flycheck")
   (global-flycheck-mode)
 
   ;; 保存時に自動チェック
@@ -439,8 +438,7 @@
 ;;; yaml
 (use-package yaml-mode
   :ensure t
-  :config
-  (add-to-list 'auto-mode-alist '("\\.raml\\'" . yaml-mode)))
+  :mode (("\\.raml\\'" . yaml-mode)))
 
 
 ;;; json
@@ -460,22 +458,31 @@
 (use-package js2-mode
   :ensure t)
 
-(use-package company-tern
+(use-package js-auto-format-mode
   :ensure t
   :config
-  (autoload 'js2-mode "js2-mode" nil t)
-  (add-to-list 'auto-mode-alist '("\\.js$" . js2-mode))
-  ;; (add-to-list 'auto-mode-alist '("\\.js$" . js2-jsx-mode))
-  (eval-after-load 'flycheck
-    '(custom-set-variables
-      '(flycheck-disabled-checkers '(javascript-jshint javascript-jscs))
-      )))
+  (add-hook 'js2-mode-hook 'js-auto-format-mode)
+  (custom-set-variables
+   '(js-auto-format-command "prettier")
+   '(js-auto-format-command-args "--write --single-quote --no-semi"))
+  )
+
+(use-package company-tern
+  :ensure t
+  :mode (("\\.js$" . js2-mode))
+  ;; :mode (("\\.js$" . js2-jsx-mode))
+  )
 
 (add-hook 'js-mode-hook
           (lambda ()
             (setq js-indent-level 2)    ; jsのインデント設定
-            (add-hook 'js2-jsx-mode-hook 'tern-mode)
-            (add-to-list 'company-backends 'company-tern) ; backendに追加
+            (add-hook 'js2-mode-hook 'tern-mode)
+            ;; (add-hook 'js2-jsx-mode-hook 'tern-mode)
+            (add-to-list 'company-backends 'company-tern)  ; backendに追加
+            (eval-after-load 'flycheck
+              '(custom-set-variables
+                '(flycheck-disabled-checkers '(javascript-jshint javascript-jscs))
+                ))
 
             ;; ESlint と競合する js2-mode の機能を無効化
             (setq js2-include-browser-externs nil)
@@ -487,12 +494,13 @@
 
 
 ;;; Python
-;; (el-get-bundle jedi)
 (use-package company-jedi
   :ensure t)
 (use-package py-autopep8
   :ensure t)
 (use-package yasnippet
+  :ensure t)
+(use-package py-isort
   :ensure t)
 
 (add-hook 'python-mode-hook
@@ -505,7 +513,7 @@
              ;; 補完したいライブラリのパスを追加
              ;; (setenv "PYTHONPATH" "/path")
              ;; (setenv "PYTHONPATH" "/home/vagrant/.pyenv/versions/miniconda3-4.0.5/envs/mlflow/lib/python3.5/site-packages:/home/vagrant/.pyenv/versions/miniconda3-4.0.5/envs/data-analysys/lib/python3.5/site-packages:/home/vagrant/.pyenv/shims")
-             (setenv "PYTHONPATH" "/Users/sci01553/.pyenv/versions/miniconda3-4.0.5/envs/mlflow/lib/python3.5/site-packages:/Users/sci01553/.pyenv/versions/miniconda3-4.0.5/envs/data-analysys/lib/python3.5/site-packages:/home/vagrant/.pyenv/shims")
+             ;; (setenv "PYTHONPATH" "/Users/sci01553/.pyenv/versions/miniconda3-4.0.5/envs/mlflow/lib/python3.5/site-packages:/Users/sci01553/.pyenv/versions/miniconda3-4.0.5/envs/data-analysys/lib/python3.5/site-packages:/home/vagrant/.pyenv/shims")
              (define-key python-mode-map "\C-c \C-d" 'jedi:show-doc)
 
              ;; 関数定義ジャンプ
@@ -523,18 +531,22 @@
                         (goto-char (nth 1 p))))))
              (define-key python-mode-map "\M-." 'jedi:jump-to-definition)
              (define-key python-mode-map "\M-," 'jedi:jump-back)
-             (define-key python-mode-map "\C-cr" 'helm-jedi-related-names)
+             ;; (define-key python-mode-map "\C-c r" 'helm-jedi-related-names)
 
              ;; PEP8のチェック
              (require 'py-autopep8)
              (py-autopep8-enable-on-save)
              (add-hook 'before-save-hook 'py-autopep8-before-save)
              (setq py-autopep8-options '("--max-line-length=160"))
-             (define-key python-mode-map "\C-cf" 'py-autopep8)
+             (define-key python-mode-map "\C-c f" 'py-autopep8)
              
              ;; スニペット
              (require 'yasnippet)
              (yas-global-mode 1)
+
+             ;; isort を保存前に実行
+             (require 'py-isort)
+             (add-hook 'before-save-hook 'py-isort-before-save)
              ))
 
 ;;; init.el ends here
@@ -547,9 +559,11 @@
    (quote
     ("2da65cb7074c176ca0a33f06bcc83ef692c9175e41b6370f5e94eb5811d6ee3a" "eea01f540a0f3bc7c755410ea146943688c4e29bea74a29568635670ab22f9bc" default)))
  '(flycheck-disabled-checkers (quote (javascript-jshint javascript-jscs)))
+ '(js-auto-format-command "prettier")
+ '(js-auto-format-command-args "--write --single-quote --no-semi")
  '(package-selected-packages
    (quote
-    (yasnippet yaml-mode use-package smartrep rotate py-autopep8 multiple-cursors monokai-theme monokai-alt-theme markdown-mode json-mode js2-mode highlight-symbol highlight-indentation helm-ls-git helm-descbinds flycheck expand-region exec-path-from-shell dockerfile-mode company-tern company-jedi comment-dwim-2 anzu))))
+    (py-isort yasnippet yaml-mode use-package smartrep rotate py-autopep8 multiple-cursors monokai-theme monokai-alt-theme markdown-mode json-mode js2-mode highlight-symbol highlight-indentation helm-ls-git helm-descbinds flycheck expand-region exec-path-from-shell dockerfile-mode company-tern company-jedi comment-dwim-2 anzu))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

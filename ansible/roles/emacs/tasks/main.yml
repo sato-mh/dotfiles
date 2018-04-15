@@ -1,0 +1,9 @@
+---
+
+- name: Add emacs25 apt repository
+  apt_repository: repo="ppa:kelleyk/emacs"
+  become: yes
+
+- name: Install emacs25
+  apt: name=emacs25-nox state=latest update_cache=yes
+  become: yes

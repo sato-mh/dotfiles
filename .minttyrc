@@ -1,0 +1,12 @@
+BoldAsFont=-1
+Transparency=high
+CursorType=block
+CursorBlinks=no
+Font=Ricty Diminished
+FontHeight=14
+Locale=ja_JP
+Charset=UTF-8
+Term=xterm-256color
+BellType=0
+AllowSetSelection=yes
+Scrollbar=none
