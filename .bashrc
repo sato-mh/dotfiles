@@ -32,7 +32,7 @@ alias gopath="cd $GOPATH"
 alias sudo="sudo -E"
 alias relogin="exec -l $SHELL"
 alias git-rm-merged-branch="git branch --merged master | grep -vE '^\*|master$|develop$' | xargs -I % git branch -d %"
-alias git-rm-remote-merged-branach="git branch -r --merged master | grep -v -e master -e develop | sed -e 's% *origin/%%' | xargs -I% git push --delete origin %"
+alias git-rm-remote-merged-branch="git branch -r --merged master | grep -v -e master -e develop | sed -e 's% *origin/%%' | xargs -I% git push --delete origin %"
 alias docker-rm-all-container="docker ps -a -q | xargs docker rm -f"
 alias docker-run-with-my-env="docker run -it -v ~/dotfiles:/root/dotfiles -v ~/projects/:/root/projects -v ~/.pyenv:/root/.pyenv"
 
@@ -113,6 +113,16 @@ then
     export PATH="$HOME/.anyenv/bin:$PATH"
     eval "$(anyenv init -)"
 fi
+
+# pipenv
+_pipenv_completion() {
+    local IFS=$'\t'
+    COMPREPLY=( $( env COMP_WORDS="${COMP_WORDS[*]}" \
+                   COMP_CWORD=$COMP_CWORD \
+                   _PIPENV_COMPLETE=complete-bash $1 ) )
+    return 0
+}
+complete -F _pipenv_completion -o default pipenv
 
 # mysql by docker
 export MYSQL_HOST=0.0.0.0

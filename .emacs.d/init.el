@@ -214,7 +214,7 @@
 
 
 ;;;
-;;; el-getを使ったパッケージ設定
+;;; パッケージ設定
 ;;;
 
 ;;; shellの環境変数引継ぎ
@@ -272,7 +272,7 @@
 ;;; 検索・置換機能の拡張
 (use-package anzu
   :ensure t
-  :diminish anzu
+  :diminish anzu-mode
   :config
   (autoload 'anzu "anzu")
   (global-anzu-mode +1)
@@ -321,9 +321,10 @@
   (define-key helm-read-file-map (kbd "TAB") 'helm-execute-persistent-action)
   (global-set-key (kbd "M-y") 'helm-show-kill-ring)
   (global-set-key (kbd "M-x") 'helm-M-x)
-  (define-key global-map (kbd "C-c i")   'helm-imenu)
   (define-key global-map (kbd "C-x C-f") 'helm-find-files)
   (define-key global-map (kbd "C-x b") 'helm-for-files)
+  (define-key global-map (kbd "C-c m") 'helm-mini)
+  (define-key global-map (kbd "C-c s") 'helm-regexp)
   (define-key global-map (kbd "C-c g") 'helm-grep-do-git-grep)
 
   ;; TABでnew bufferが作成しない(ファイルがない時は何もしない)
@@ -340,7 +341,6 @@
 (use-package helm-descbinds
   :ensure t
   :config
-  ;; helm-descbinds用キーバインド
   (global-set-key (kbd "C-c b") 'helm-descbinds))
 
 
@@ -348,11 +348,59 @@
 (use-package helm-ls-git
   :ensure t
   :config
-  (autoload 'helm-descbinds "helm-descbinds")
-  (autoload 'helm-ls-git "helm-ls-git")
-  ;; helm-ls-git用キーバインド
   (global-set-key (kbd "C-c l") 'helm-ls-git-ls))
 
+
+;; helmでtrampを実行
+(use-package helm-tramp
+  :ensure t)
+
+;; helm-swoop
+(use-package helm-swoop
+  :ensure t
+  :config
+  ;; Change the keybinds to whatever you like :)
+  (global-set-key (kbd "M-i") 'helm-swoop)
+  (global-set-key (kbd "M-I") 'helm-swoop-back-to-last-point)
+  (global-set-key (kbd "C-c M-i") 'helm-multi-swoop)
+  (global-set-key (kbd "C-x M-i") 'helm-multi-swoop-all)
+  ;; Move up and down like isearch
+  (define-key helm-swoop-map (kbd "C-r") 'helm-previous-line)
+  (define-key helm-swoop-map (kbd "C-s") 'helm-next-line)
+  (define-key helm-multi-swoop-map (kbd "C-r") 'helm-previous-line)
+  (define-key helm-multi-swoop-map (kbd "C-s") 'helm-next-line)
+  ;; When doing isearch, hand the word over to helm-swoop
+  (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
+  ;; From helm-swoop to helm-multi-swoop-all
+  (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
+
+  ;; Save buffer when helm-multi-swoop-edit complete
+  (setq helm-multi-swoop-edit-save t)
+
+  ;; If this value is t, split window inside the current window
+  (setq helm-swoop-split-with-multiple-windows nil)
+
+  ;; Split direcion. 'split-window-vertically or 'split-window-horizontally
+  (setq helm-swoop-split-direction 'split-window-horizontally)
+
+  ;; If nil, you can slightly boost invoke speed in exchange for text color
+  (setq helm-swoop-speed-or-color t)
+
+  ;; If you prefer fuzzy matching
+  (setq helm-swoop-use-fuzzy-match nil))
+
+;; プロジェクト管理機能
+(use-package projectile
+  :ensure t
+  :config
+  (projectile-mode))
+
+;; プロジェクト管理機能の Helm 統合
+(use-package helm-projectile
+  :ensure t
+  :config
+  ;; (setq projectile-completion-system 'helm)
+  (helm-projectile-on))
 
 ;;; company (補完機能)
 (use-package company
@@ -363,7 +411,7 @@
   (global-company-mode)                   ; 全バッファでcompanyを有効にする
   (setq company-idle-delay 0)             ; デフォルトは0.5
   (setq company-minimum-prefix-length 2)  ; デフォルトは4
-  (setq company-selection-wrap-around t)  ; 一番下の候補で下を押すと最初に戻る
+  (setq company-selection-wrap-around t) ; 一番下の候補で下を押すと最初に戻る
   (setq company-dabbrev-downcase nil)     ; lowercaseで補完される機能の停止
 
   ;; 不要なキーバインドを解除
@@ -410,7 +458,7 @@
   :ensure t
   :config
   (global-flycheck-mode)
-
+  (flycheck-add-mode 'javascript-eslint 'js2-mode)
   ;; 保存時に自動チェック
   (setq flycheck-check-syntax-automatically '(mode-enabled save))
 
@@ -452,10 +500,32 @@
 (use-package dockerfile-mode
   :ensure t)
 
-
 ;;; JavaScript
+(use-package company-tern
+  :ensure t
+  :mode (("\\.js$" . js2-mode))
+  ;; :mode (("\\.js$" . js2-jsx-mode))
+  )
+
 (use-package js2-mode
-  :ensure t)
+  :ensure t
+  :config
+  (setq js-indent-level 2)    ; jsのインデント設定
+  (add-hook 'js2-mode-hook 'tern-mode)
+  ;; (add-hook 'js2-jsx-mode-hook 'tern-mode)
+  (add-to-list 'company-backends 'company-tern)  ; backendに追加
+  (eval-after-load 'flycheck
+    '(custom-set-variables
+      '(flycheck-disabled-checkers '(javascript-jshint javascript-jscs))
+      ))
+  
+  ;; ESlint と競合する js2-mode の機能を無効化
+  (setq js2-include-browser-externs nil)
+  (setq js2-mode-show-parse-errors nil)
+  (setq js2-mode-show-strict-warnings nil)
+  (setq js2-highlight-external-variables nil)
+  (setq js2-include-jslint-globals nil)
+  )
 
 (use-package js-auto-format-mode
   :ensure t
@@ -465,31 +535,6 @@
    '(js-auto-format-command "prettier")
    '(js-auto-format-command-args "--write --single-quote --no-semi"))
   )
-
-(use-package company-tern
-  :ensure t
-  :mode (("\\.js$" . js2-mode))
-  ;; :mode (("\\.js$" . js2-jsx-mode))
-  )
-
-(add-hook 'js-mode-hook
-          (lambda ()
-            (setq js-indent-level 2)    ; jsのインデント設定
-            (add-hook 'js2-mode-hook 'tern-mode)
-            ;; (add-hook 'js2-jsx-mode-hook 'tern-mode)
-            (add-to-list 'company-backends 'company-tern)  ; backendに追加
-            (eval-after-load 'flycheck
-              '(custom-set-variables
-                '(flycheck-disabled-checkers '(javascript-jshint javascript-jscs))
-                ))
-
-            ;; ESlint と競合する js2-mode の機能を無効化
-            (setq js2-include-browser-externs nil)
-            (setq js2-mode-show-parse-errors nil)
-            (setq js2-mode-show-strict-warnings nil)
-            (setq js2-highlight-external-variables nil)
-            (setq js2-include-jslint-globals nil)
-            ))
 
 
 ;;; Python
@@ -549,23 +594,3 @@
              ))
 
 ;;; init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("2da65cb7074c176ca0a33f06bcc83ef692c9175e41b6370f5e94eb5811d6ee3a" "eea01f540a0f3bc7c755410ea146943688c4e29bea74a29568635670ab22f9bc" default)))
- '(flycheck-disabled-checkers (quote (javascript-jshint javascript-jscs)))
- '(js-auto-format-command "prettier")
- '(js-auto-format-command-args "--write --single-quote --no-semi")
- '(package-selected-packages
-   (quote
-    (py-isort yasnippet yaml-mode use-package smartrep rotate py-autopep8 multiple-cursors monokai-theme monokai-alt-theme markdown-mode json-mode js2-mode highlight-symbol highlight-indentation helm-ls-git helm-descbinds flycheck expand-region exec-path-from-shell dockerfile-mode company-tern company-jedi comment-dwim-2 anzu))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
