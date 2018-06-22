@@ -341,6 +341,8 @@
 (use-package helm-descbinds
   :ensure t
   :config
+  ;; helm-descbinds用キーバインド
+
   (global-set-key (kbd "C-c b") 'helm-descbinds))
 
 
@@ -411,7 +413,7 @@
   (global-company-mode)                   ; 全バッファでcompanyを有効にする
   (setq company-idle-delay 0)             ; デフォルトは0.5
   (setq company-minimum-prefix-length 2)  ; デフォルトは4
-  (setq company-selection-wrap-around t) ; 一番下の候補で下を押すと最初に戻る
+  (setq company-selection-wrap-around t)  ; 一番下の候補で下を押すと最初に戻る
   (setq company-dabbrev-downcase nil)     ; lowercaseで補完される機能の停止
 
   ;; 不要なキーバインドを解除
@@ -458,7 +460,8 @@
   :ensure t
   :config
   (global-flycheck-mode)
-  (flycheck-add-mode 'javascript-eslint 'js2-mode)
+
+
   ;; 保存時に自動チェック
   (setq flycheck-check-syntax-automatically '(mode-enabled save))
 
@@ -535,7 +538,6 @@
    '(js-auto-format-command "prettier")
    '(js-auto-format-command-args "--write --single-quote --no-semi"))
   )
-
 
 ;;; Python
 (use-package company-jedi
