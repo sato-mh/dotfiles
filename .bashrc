@@ -1,11 +1,37 @@
-# .bashrc
+# ===================
+# Basic
+# ===================
 
-# Source global definitions
 if [ -f /etc/bashrc ]; then
 	. /etc/bashrc
 fi
 
+export TERM=xterm-256color
+export EDITOR=emacs
+
+# undef default keybind
+stty stop undef
+
+
+# ===================
+# History
+# ===================
+
+function share_history {
+    history -a
+    history -c
+    history -r
+}
+PROMPT_COMMAND='share_history'
+shopt -u histappend
+export HISTSIZE=50000
+export HISTTIMEFORMAT='%Y/%m/%d %H:%M:%S '
+
+
+# ===================
 # Alias
+# ===================
+
 case "${OSTYPE}" in
     darwin*)
         export LSCOLORS=gxfxcxdxbxegedabagacad
@@ -28,15 +54,19 @@ case "${OSTYPE}" in
 	      ;;
 esac
 alias grep="grep --color"
-alias gopath="cd $GOPATH"
 alias sudo="sudo -E"
 alias relogin="exec -l $SHELL"
+alias gopath="cd $GOPATH"
+
+# for git
 alias git-rm-merged-branch="git branch --merged master | grep -vE '^\*|master$|develop$' | xargs -I % git branch -d %"
 alias git-rm-remote-merged-branch="git branch -r --merged master | grep -v -e master -e develop | sed -e 's% *origin/%%' | xargs -I% git push --delete origin %"
+
+# for docker
 alias docker-rm-all-container="docker ps -a -q | xargs docker rm -f"
 alias docker-run-with-my-env="docker run -it -v ~/dotfiles:/root/dotfiles -v ~/projects/:/root/projects -v ~/.pyenv:/root/.pyenv"
 
-# emacs
+# for emacs
 function estart() {
   if ! emacsclient -e 0 > /dev/null 2>&1; then
           cd > /dev/null 2>&1
@@ -46,27 +76,13 @@ function estart() {
 }
 alias e='estart && emacsclient -nw'
 alias ekill="emacsclient -e '(kill-emacs)'"
-export EDITOR=emacs
 
-# undef default keybind
-stty stop undef
 
-# history
-function share_history {
-    history -a
-    history -c
-    history -r
-}
-PROMPT_COMMAND='share_history'
-shopt -u histappend
-export HISTSIZE=10000
-export HISTTIMEFORMAT='%Y/%m/%d %H:%M:%S '
-
-# terminal colors
-TERM=xterm-256color
-
+# ===================
 # PS1
-# PS1="[\u@\h \W]\\$ "    # デフォルト設定
+# デフォルト設定 (PS1="[\u@\h \W]\\$ ")
+# ===================
+
 function parse_git_branch {
     git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ [\1]/'
 }
@@ -97,6 +113,11 @@ function promps {
     PS1="${TITLEBAR}${LIGHT_RED}${BASE}${WHITE}:${YELLOW}\W${LIGHT_GREEN}\$(parse_git_branch)\n${YELLOW}\$${WHITE} "
 }
 promps
+
+
+# ===================
+# Others
+# ===================
 
 # bash-completion
 if [ -f /usr/local/share/bash-completion/bash_completion ]; then
@@ -129,3 +150,8 @@ export MYSQL_HOST=0.0.0.0
 
 # run ssh-agent
 eval `ssh-agent` 1> /dev/null
+
+# config for fzf
+if [ -f ~/.dotfiles/bashrc.d/fzf.conf ]; then
+    . ~/.dotfiles/bashrc.d/fzf.conf 
+fi

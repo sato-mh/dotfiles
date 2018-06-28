@@ -337,6 +337,13 @@
   (setq helm-buffer-details-flag nil))
 
 
+;; silversearcher-ag で検索を高速化
+(use-package helm-ag
+  :ensure t
+  :bind ("C-c g" . helm-do-ag)
+  :config
+  (setq helm-ag-insert-at-point 'symbol))
+
 ;; helmでキーバインドを表示
 (use-package helm-descbinds
   :ensure t
@@ -503,6 +510,7 @@
 (use-package dockerfile-mode
   :ensure t)
 
+
 ;;; JavaScript
 (use-package company-tern
   :ensure t
@@ -517,18 +525,23 @@
   (add-hook 'js2-mode-hook 'tern-mode)
   ;; (add-hook 'js2-jsx-mode-hook 'tern-mode)
   (add-to-list 'company-backends 'company-tern)  ; backendに追加
+
   (eval-after-load 'flycheck
     '(custom-set-variables
-      '(flycheck-disabled-checkers '(javascript-jshint javascript-jscs))
-      ))
+      '(flycheck-disabled-checkers '(javascript-jshint javascript-jscs))))
   
   ;; ESlint と競合する js2-mode の機能を無効化
   (setq js2-include-browser-externs nil)
   (setq js2-mode-show-parse-errors nil)
   (setq js2-mode-show-strict-warnings nil)
   (setq js2-highlight-external-variables nil)
-  (setq js2-include-jslint-globals nil)
-  )
+  (setq js2-include-jslint-globals nil))
+
+(use-package add-node-modules-path
+  :ensure t
+  :config
+  (eval-after-load 'js-mode
+    '(add-hook 'js-mode-hook #'add-node-modules-path)))
 
 (use-package js-auto-format-mode
   :ensure t
@@ -536,8 +549,7 @@
   (add-hook 'js2-mode-hook 'js-auto-format-mode)
   (custom-set-variables
    '(js-auto-format-command "prettier")
-   '(js-auto-format-command-args "--write --single-quote --no-semi"))
-  )
+   '(js-auto-format-command-args "--write --single-quote --no-semi")))
 
 ;;; Python
 (use-package company-jedi
@@ -596,3 +608,25 @@
              ))
 
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("2da65cb7074c176ca0a33f06bcc83ef692c9175e41b6370f5e94eb5811d6ee3a" "eea01f540a0f3bc7c755410ea146943688c4e29bea74a29568635670ab22f9bc" default)))
+ '(flycheck-disabled-checkers (quote (javascript-jshint javascript-jscs)))
+ '(js-auto-format-command "prettier")
+ '(js-auto-format-command-args "--write --single-quote --no-semi")
+ '(package-selected-packages
+   (quote
+    (helm-ag helm-projectile helm-swoop sh-mode shell-script-mode helm-tramp py-isort yasnippet yaml-mode use-package smartrep rotate py-autopep8 multiple-cursors monokai-theme monokai-alt-theme markdown-mode json-mode js2-mode highlight-symbol highlight-indentation helm-ls-git helm-descbinds flycheck expand-region exec-path-from-shell dockerfile-mode company-tern company-jedi comment-dwim-2 anzu)))
+ '(sh-basic-offset 2)
+ '(sh-indentation 2))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
