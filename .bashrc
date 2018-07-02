@@ -149,7 +149,10 @@ complete -F _pipenv_completion -o default pipenv
 export MYSQL_HOST=0.0.0.0
 
 # run ssh-agent
-eval `ssh-agent` 1> /dev/null
+if [ ! -f ~/.ssh-agent.out ]; then
+    . .dotfiles/bin/start-ssh-agent.sh
+fi
+eval $(cat ~/.ssh-agent.out) 1> /dev/null
 
 # config for fzf
 if [ -f ~/.dotfiles/bashrc.d/fzf.conf ]; then

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 WORK_DIR=$(echo $(cd $(dirname $0) && pwd))
 ln -sf $WORK_DIR/.bashrc ~/.bashrc
 cp -r $WORK_DIR/.emacs.d ~/.emacs.d
