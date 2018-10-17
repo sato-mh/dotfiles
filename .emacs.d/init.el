@@ -118,7 +118,6 @@
 
 ;;; バッファの自動更新
 (global-auto-revert-mode 1)
-(setq auto-revert-check-vc-info t)
 
 ;;; 選択範囲をisearch
 (defadvice isearch-mode (around isearch-mode-default-string (forward &optional regexp op-fun recursive-edit word-p) activate)
@@ -229,8 +228,7 @@
   (add-hook 'python-mode-hook 'highlight-symbol-mode)
   (add-hook 'yaml-mode-hook 'highlight-symbol-mode)
   (add-hook 'emacs-lisp-mode-hook 'highlight-symbol-mode)
-  (add-hook 'js2-mode-hook 'highlight-symbol-mode)
-  (add-hook 'js2-jsx-mode-hook 'highlight-symbol-mode)
+  (add-hook 'js-mode-hook 'highlight-symbol-mode)
   (setq highlight-symbol-colors
      '(
        "DarkOrange" "DodgerBlue1" "DeepPink1"
@@ -505,37 +503,45 @@
   ;; (add-to-list 'auto-mode-alist '("\\.json\\'" . json-mode))
   )
 
-
 ;;; docker
 (use-package dockerfile-mode
   :ensure t)
 
 
 ;;; JavaScript
+;; (use-package company-tern
+;;   :ensure t
+;;   :mode (("\\.js$" . js2-mode))
+;;   ;; :mode (("\\.js$" . js2-jsx-mode))
+;;   )
+
+;; (use-package js2-mode
+;;   :ensure t
+;;   :config
+;;   (setq js-indent-level 2)    ; jsのインデント設定
+;;   (add-hook 'js2-mode-hook 'tern-mode)
+;;   ;; (add-hook 'js2-jsx-mode-hook 'tern-mode)
+;;   (add-to-list 'company-backends 'company-tern)  ; backendに追加
+
+;; (eval-after-load 'flycheck
+;;   '(custom-set-variables
+;;     '(flycheck-disabled-checkers '(javascript-jshint javascript-jscs))))
+
+;; ;; ESlint と競合する js2-mode の機能を無効化
+;; (setq js2-include-browser-externs nil)
+;; (setq js2-mode-show-parse-errors nil)
+;; (setq js2-mode-show-strict-warnings nil)
+;; (setq js2-highlight-external-variables nil)
+;; (setq js2-include-jslint-globals nil))
+
 (use-package company-tern
   :ensure t
-  :mode (("\\.js$" . js2-mode))
-  ;; :mode (("\\.js$" . js2-jsx-mode))
+  :mode (("\\.js$" . js-mode))
   )
 
-(use-package js2-mode
-  :ensure t
-  :config
-  (setq js-indent-level 2)    ; jsのインデント設定
-  (add-hook 'js2-mode-hook 'tern-mode)
-  ;; (add-hook 'js2-jsx-mode-hook 'tern-mode)
-  (add-to-list 'company-backends 'company-tern)  ; backendに追加
-
-  (eval-after-load 'flycheck
-    '(custom-set-variables
-      '(flycheck-disabled-checkers '(javascript-jshint javascript-jscs))))
-  
-  ;; ESlint と競合する js2-mode の機能を無効化
-  (setq js2-include-browser-externs nil)
-  (setq js2-mode-show-parse-errors nil)
-  (setq js2-mode-show-strict-warnings nil)
-  (setq js2-highlight-external-variables nil)
-  (setq js2-include-jslint-globals nil))
+(setq js-indent-level 2)    ; jsのインデント設定
+(add-hook 'js-mode-hook 'tern-mode)
+(add-to-list 'company-backends 'company-tern)  ; backendに追加
 
 (use-package add-node-modules-path
   :ensure t
@@ -546,10 +552,10 @@
 (use-package js-auto-format-mode
   :ensure t
   :config
-  (add-hook 'js2-mode-hook 'js-auto-format-mode)
+  (add-hook 'js-mode-hook 'js-auto-format-mode)
   (custom-set-variables
-   '(js-auto-format-command "prettier")
-   '(js-auto-format-command-args "--write --single-quote --no-semi")))
+   '(js-auto-format-command "prettier-eslint")
+   '(js-auto-format-command-args "--write")))
 
 ;;; Python
 (use-package company-jedi
@@ -607,26 +613,25 @@
              (add-hook 'before-save-hook 'py-isort-before-save)
              ))
 
+
+;;; Golang
+(use-package go-mode
+  :ensure t)
+(use-package company-go
+  :ensure t)
+
+;; 諸々の有効化、設定
+(add-hook 'go-mode-hook 'company-mode)
+(add-hook 'go-mode-hook 'flycheck-mode)
+(add-hook 'go-mode-hook (lambda ()
+                          (setq gofmt-command "goimports")
+                          (add-hook 'before-save-hook 'gofmt-before-save)
+                          (set (make-local-variable 'company-backends) '(company-go))
+                          (company-mode)
+                          (set (make-local-variable 'compile-command)
+                               "go build -v && go test -v && go vet")
+                          (local-set-key (kbd "M-.") 'godef-jump))
+                          (go-eldoc-setup)
+                          )
+
 ;;; init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   (quote
-    ("2da65cb7074c176ca0a33f06bcc83ef692c9175e41b6370f5e94eb5811d6ee3a" "eea01f540a0f3bc7c755410ea146943688c4e29bea74a29568635670ab22f9bc" default)))
- '(flycheck-disabled-checkers (quote (javascript-jshint javascript-jscs)))
- '(js-auto-format-command "prettier")
- '(js-auto-format-command-args "--write --single-quote --no-semi")
- '(package-selected-packages
-   (quote
-    (helm-ag helm-projectile helm-swoop sh-mode shell-script-mode helm-tramp py-isort yasnippet yaml-mode use-package smartrep rotate py-autopep8 multiple-cursors monokai-theme monokai-alt-theme markdown-mode json-mode js2-mode highlight-symbol highlight-indentation helm-ls-git helm-descbinds flycheck expand-region exec-path-from-shell dockerfile-mode company-tern company-jedi comment-dwim-2 anzu)))
- '(sh-basic-offset 2)
- '(sh-indentation 2))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
