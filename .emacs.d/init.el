@@ -249,6 +249,7 @@
 ;;: インデントをハイライトする
 (use-package highlight-indentation
   :ensure t
+  :diminish highlight-indentation-current-column-mode
   :hook ((emacs-lisp-mode . highlight-indentation-current-column-mode)
          (yaml-mode . highlight-indentation-current-column-mode)
          (python-mode . highlight-indentation-current-column-mode)
@@ -418,6 +419,7 @@
 ;;; company (補完機能)
 (use-package company
   :ensure t
+  :diminish company-mode
   :config
   (global-company-mode)                  ; 全バッファでcompanyを有効にする
   (setq company-idle-delay 0)            ; デフォルトは0.5
@@ -489,18 +491,17 @@
 (use-package ansible
   :ensure t)
 
+;;; js
 (use-package js
-  :ensure t
   :mode ("\\.js\\'" . js-mode)
   :config
-  (setq js-indent-level 2))
+  (setq js-indent-level 2)
+  ;; company の補完候補に jedi を追加
+  (add-to-list 'company-backends 'company-tern))
 
 (use-package company-tern
   :ensure t
-  :hook ((js-mode . tern-mode))
-  :config
-  )
-(add-to-list 'company-backends 'company-tern)
+  :hook ((js-mode . tern-mode)))
 
 (use-package add-node-modules-path
   :ensure t
@@ -519,14 +520,10 @@
   :ensure company-jedi
   :ensure py-autopep8
   :ensure py-isort
-  :hook ((python-mode . (lambda()
-                          (set (make-local-variable 'company-backends)
-                               '(company-jedi)))))
+  :hook ((python-mode . py-autopep8-enable-on-save))
   :config
-  ;;; jedi の設定
-  (setq jedi:complete-on-dot t)
-  (setq jedi:use-shortcuts t)
-  ;; (add-to-list 'company-backends 'company-jedi)
+  ;; company の補完候補に jedi を追加
+  (add-to-list 'company-backends 'company-jedi)
   ;; 補完したいライブラリのパスを追加
   ;; (setenv "PYTHONPATH" "/path")
   ;; 関数定義ジャンプ
@@ -547,14 +544,9 @@
              ("M-." . jedi:jump-to-definition)
              ("M-," . jedi:jump-back))
 
-  ;; PEP8のチェック
-  (py-autopep8-enable-on-save)
-  (add-hook 'before-save-hook 'py-autopep8-before-save)
+  ;; autopep8 の 1 行の最大文字数を設定
   (setq py-autopep8-options '("--max-line-length=79"))
-  (bind-keys :map python-mode-map
-             ("C-c f" . py-autopep8))
-
-  ;; isort を保存前に実行
+  ;; 保存時に isort を実行
   (add-hook 'before-save-hook 'py-isort-before-save))
 
 ;;; Golang
@@ -564,6 +556,7 @@
          (go-mode . company-mode)
          (go-mode . flycheck-mode)
          (go-mode . (lambda()
+                      ;; company の補完候補に jedi を追加
                       (set (make-local-variable 'company-backends) '(company-go))
                       (set (make-local-variable 'compile-command)
                            "go build -v && go test -v && go vet"))))
