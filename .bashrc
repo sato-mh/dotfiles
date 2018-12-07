@@ -83,9 +83,9 @@ alias ekill="emacsclient -e '(kill-emacs)'"
 # デフォルト設定 (PS1="[\u@\h \W]\\$ ")
 # ===================
 
-function parse_git_branch {
-    git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ [\1]/'
-}
+# function parse_git_branch {
+#     git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ [\1]/'
+# }
 function promps {
     # 色の変数宣言
     local BLACK="\[\e[0;30m\]"
@@ -110,7 +110,8 @@ function promps {
         *)      TITLEBAR="";;
     esac
     local BASE="\u@\h"
-    PS1="${TITLEBAR}${LIGHT_RED}${BASE}${WHITE}:${YELLOW}\W${LIGHT_GREEN}\$(parse_git_branch)\n${YELLOW}\$${WHITE} "
+    # PS1="${TITLEBAR}${LIGHT_RED}${BASE}${WHITE}:${YELLOW}\W${LIGHT_GREEN}\$(parse_git_branch)\n${YELLOW}\$${WHITE} "
+    PS1="${TITLEBAR}${LIGHT_RED}${BASE}${WHITE}:${YELLOW}\W${LIGHT_GREEN}\$(__git_ps1)\n${YELLOW}\$${WHITE} "
 }
 promps
 
@@ -158,3 +159,7 @@ eval $(cat ~/.ssh-agent.out) 1> /dev/null
 if [ -f ~/.dotfiles/bashrc.d/fzf.conf ]; then
     . ~/.dotfiles/bashrc.d/fzf.conf 
 fi
+
+# gopath
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
