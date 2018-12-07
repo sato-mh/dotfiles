@@ -1,44 +1,51 @@
 
+;;; init.el --- My Emacs Initialization/Customization file
 
-;;; package --- init.el ---
+;;; Commentary:
+
+;; This is my personal Emacs configuration.
+
 ;;; Code:
 
-;;; 
+
+;:; ==================================================
 ;;; 基本設定
-;;;
+;;; ==================================================
 
-;;; load-pathを追加する関数を定義
-
-;; Added by Package.el.  This must come before configurations of
-;; installed packages.  Don't delete this line.  If you don't want it,
-;; just comment it out by adding a semicolon to the start of the line.
-;; You may delete these explanatory comments.
-
-;;; ディレクトリをサブディレクトリごとload-pathに追加する関数を定義
+;;; サブディレクトリごと load-path に追加する関数を定義
 (defun add-to-load-path (&rest paths)
   (let (path)
     (dolist (path paths paths)
-      (let ((default-directory (expand-file-name (concat user-emacs-directory path))))
+      (let ((default-directory(expand-file-name (concat user-emacs-directory path))))
         (add-to-list 'load-path default-directory)
         (if (fboundp 'normal-top-level-add-subdirs-to-load-path)
             (normal-top-level-add-subdirs-to-load-path))))))
 
-;;; package.elの保存先とリポジトリの追加
-(setq package-user-dir "~/.emacs.d/elisp/elpa/")
+;;; load-path に追加
+(add-to-load-path "site-lisp")
+
+;;; package.el の保存先とリポジトリの追加
+(setq package-user-dir "~/.emacs.d/site-lisp/elpa/")
 (setq package-archives
       '(("gnu"   . "http://elpa.gnu.org/packages/")
         ("melpa" . "http://melpa.org/packages/")
         ("org"   . "http://orgmode.org/elpa/")))
 (package-initialize)
 
-;;; use-packageをと必須パッケージを自動インストール
+;;; use-packageと必須パッケージを自動インストール
 (when (not (package-installed-p 'use-package))
   (package-refresh-contents)
   (package-install 'use-package))
 (require 'use-package)
-(require 'bind-key)
+(use-package bind-key
+  :ensure t)
 (use-package diminish
   :ensure t)
+
+
+;:; ==================================================
+;;; 環境設定
+;;; ==================================================
 
 ;;; 環境を日本語、UTF-8にする
 (set-language-environment "Japanese")
@@ -47,6 +54,17 @@
 (set-buffer-file-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
 (prefer-coding-system 'utf-8)
+
+;;; 曖昧な幅の文字を全角に固定する
+;; See: https://github.com/hamano/locale-eaw
+(use-package eaw
+  :init
+  (when (not (file-exists-p "~/.emacs.d/site-lisp/eaw.el"))
+    (url-copy-file
+     "https://raw.githubusercontent.com/hamano/locale-eaw/master/eaw.el"
+     "~/.emacs.d/site-lisp/eaw.el"))
+  :config
+  (eaw-fullwidth))
 
 ;;; カラーテーマの設定
 (use-package monokai-theme
@@ -57,6 +75,12 @@
 ;;; スタートアップメッセージを表示させない
 (setq inhibit-startup-message t)
 
+;;; メニューバーを消す
+(menu-bar-mode 0)
+
+;;; "yes or no" の選択を "y or n" にする
+(fset 'yes-or-no-p 'y-or-n-p)
+
 ;;; バックアップファイルを作成させない
 (setq make-backup-files nil)
 (setq auto-save-default nil)
@@ -64,63 +88,55 @@
 ;;; 終了時にオートセーブファイルを削除する
 (setq delete-auto-save-files t)
 
-;;; タブにスペースを使用する
-(setq-default tab-width 2)
-(setq-default indent-tabs-mode nil)
+;;; window-system の場合にクリップボードを共有する
+(cond (window-system
+       (setq select-enable-clipboard t)))
 
-;;; インデント変更
-(setq-default c-basic-offset 2)
-
-;;; 自動インデントを有効
-(electric-indent-mode 1)
-
-;;; "yes or no" の選択を "y or n" にする
-(fset 'yes-or-no-p 'y-or-n-p)
-
-;;; メニューバーを消す
-(menu-bar-mode -1)
-
-;;; 行番号を表示する
-(global-linum-mode t)
-;; 行番号表示箇所に3桁分の領域を確保
-(setq linum-format "%3d ")
-
-;;; 列数を表示する
-(column-number-mode t)
-
-;;; 行数を表示する
-(global-linum-mode t)
-
-;;; カーソルの点滅をやめる
-(blink-cursor-mode 0)
-
-;;; カーソル行をハイライトする
-(global-hl-line-mode t)
-
-;;; 対応する括弧を光らせる
-(show-paren-mode 1)
-
-;;; ウィンドウ内に収まらないときだけ、カッコ内も光らせる
-(setq show-paren-style 'mixed)
-;; (set-face-background 'show-paren-match-face "grey")
-;; (set-face-foreground 'show-paren-match-face "black")
-
-;;; スクロールは１行ごとに
+;;; 1 行ごとにスクロールする
 (setq scroll-conservatively 1)
 
-;;; 対応する括弧を補完
-(electric-pair-mode t)
-(add-to-list 'electric-pair-pairs '(?{ . ?}))
-(add-to-list 'electric-pair-pairs '(?' . ?'))
-
-;;; クリップボードの共有
-(setq x-select-enable-clipboard t)
-
-;;; バッファの自動更新
+;;; バッファを自動更新する
 (global-auto-revert-mode 1)
 
-;;; 選択範囲をisearch
-(defadvice isearch-mode (around isearch-mode-default-string (forward &optional regexp op-fun recursive-edit word-p) activate)
+;;; shell の環境変数引継ぎ
+(use-package exec-path-from-shell
+  :ensure t)
+
+
+;:; ==================================================
+;;; グローバルキーバインド設定
+;;; ==================================================
+
+;;; 前の文字を削除
+(bind-keys :map key-translation-map ("C-h" . "<DEL>"))
+
+;;; 前の単語を削除
+(bind-keys ("M-h" . backward-kill-word))
+
+;;; ペインの移動
+;; (bind-keys ("C-c C-b" . windmove-left)
+;;            ("C-c C-n" . windmove-down)
+;;            ("C-c C-p" . windmove-up)
+;;            ("C-c C-f" . windmove-right))
+
+;;; バッファの手動更新
+(bind-keys ([f5] . revert-buffer))
+
+;;; Mac 用の設定
+(when (equal system-type 'darwin)
+  ;; Mac のキーバインドを使う
+  (mac-key-mode 1)
+  ;; Macのoptionをメタキーにする
+  ;; 下記でうまく行かなかった場合: (setq mac-option-modifier 'meta)
+  (defvar mac-option-modifier 'meta))
+
+
+;:; ==================================================
+;;; 独自関数定義
+;;; ==================================================
+
+;;; 選択範囲を isearch のクエリに追加する
+(defadvice isearch-mode (around isearch-mode-default-string(forward &optional regexp op-fun recursive-edit word-p) activate)
   (if (and transient-mark-mode mark-active (not (eq (mark) (point))))
       (progn
         (isearch-update-ring (buffer-substring-no-properties (mark) (point)))
@@ -132,7 +148,7 @@
           (isearch-repeat-forward)))
     ad-do-it))
 
-;;; ウィンドウサイズの変更
+;;; ウィンドウサイズを C-c w => fbpn で変更できるようにする
 (defun window-resizer ()
   "Control window size and position."
   (interactive)
@@ -163,141 +179,106 @@
                  (when command (call-interactively command)))
                (message "Quit")
                (throw 'end-flag t)))))))
-(global-set-key "\C-cw" 'window-resizer)
+(bind-key "C-c w" 'window-resizer)
 
 
-;;;
-;;; dired設定
-;;;
+;:; ==================================================
+;;; エディタ設定
+;;; ==================================================
 
-;;; dired-x を使用
-(require 'dired-x)
+;;; タブにスペースを使用する
+(setq-default tab-width 2)
+(setq-default indent-tabs-mode nil)
 
-;;; dired-find-alternate-file の有効化
-(put 'dired-find-alternate-file 'disabled nil)
+;;; 改行時に自動インデントする
+(electric-indent-mode 1)
 
-;;; Enterを押した際に同じバッファでファイルを開く
-(define-key dired-mode-map (kbd "RET") 'dired-find-alternate-file)
+;;; 行番号を表示する
+(use-package linum
+  :config
+  (global-linum-mode t)
+  ;; 行番号表示箇所に3桁分の領域を確保する
+  (setq linum-format "%3d "))
 
-;;;  二つのdiredバッファを開いているとき、RやCのデフォルトの宛先がもう片方のディレクトリになる
-(setq dired-dwim-target t)
+;;; 列数を表示する
+(column-number-mode 1)
 
-;;; rを押した際にファイル名をまとめて編集可能なWDiredモードに入る
-(define-key dired-mode-map (kbd "r") 'wdired-change-to-wdired-mode)
+;;; カーソル行をハイライトしない
+(global-hl-line-mode 0)
 
+;;; 対応する括弧を光らせる
+(use-package paren
+  :config
+  (show-paren-mode 1)
+  (setq show-paren-style 'mixed))
 
-;;;
-;;; キーバインド設定
-;;;
+;;; 対応する括弧を補完する
+(use-package elec-pair
+  :config
+  (electric-pair-mode t)
+  (add-to-list 'electric-pair-pairs '(?{ . ?}))
+  (add-to-list 'electric-pair-pairs '(?' . ?')))
 
-;;; 前の文字を削除
-(define-key key-translation-map (kbd "C-h") (kbd "<DEL>"))
+;;; M-; で現在の行をコメントアウトする
+(use-package comment-dwim-2
+  :ensure t
+  :bind (("M-;" . comment-dwim-2))
+  :config
+  (setq comment-dwim-2--inline-comment-behavior 'reindent-comment))
 
-;;; 前の単語を削除
-(global-set-key (kbd "M-h") 'backward-kill-word)
-
-;;; ペインの移動
-(global-set-key (kbd "\C-c C-b")  'windmove-left)
-(global-set-key (kbd "\C-c C-n")  'windmove-down)
-(global-set-key (kbd "\C-c C-p")    'windmove-up)
-(global-set-key (kbd "\C-c C-f") 'windmove-right)
-
-;;; バッファの手動更新
-(global-set-key [f5] 'revert-buffer)
-
-;;; Macのキーバインドを使う
-;; (mac-key-mode 1)
-
-;;; Macのoptionをメタキーにする
-(setq mac-option-modifier 'meta)
-
-
-;;;
-;;; パッケージ設定
-;;;
-
-;;; shellの環境変数引継ぎ
-(use-package exec-path-from-shell
-  :ensure t)
-
-;;; 同じ単語をハイライト
+;;; 同じ単語をハイライトする
 (use-package highlight-symbol
   :ensure t
+  :diminish highlight-symbol-mode
+  :hook ((emacs-lisp-mode . highlight-symbol-mode)
+         (yaml-mode . highlight-symbol-mode)
+         (python-mode . highlight-symbol-mode)
+         (js-mode . highlight-symbol-mode)
+         (go-mode . highlight-symbol-mode))
+  :bind (("M-n" . highlight-symbol-next)
+         ("M-p" . highlight-symbol-prev))
   :config
-  (setq highlight-symbol-idle-delay 0)
-  (add-hook 'python-mode-hook 'highlight-symbol-mode)
-  (add-hook 'yaml-mode-hook 'highlight-symbol-mode)
-  (add-hook 'emacs-lisp-mode-hook 'highlight-symbol-mode)
-  (add-hook 'js-mode-hook 'highlight-symbol-mode)
   (setq highlight-symbol-colors
-     '(
-       "DarkOrange" "DodgerBlue1" "DeepPink1"
+     '("DarkOrange" "DodgerBlue1" "DeepPink1"
        "goldenrod3" "orchid2" "chartreuse3"
        "yellow3" "firebrick1" "green2"
        "IndianRed3" "SeaGreen3" "cornflower blue"
-       "SlateBlue2" "medium orchid" "sea green"
-       ))
-  (global-set-key (kbd "M-n") 'highlight-symbol-next)
-  (global-set-key (kbd "M-p") 'highlight-symbol-prev))
+       "SlateBlue2" "medium orchid" "sea green"))
+  (setq highlight-symbol-idle-delay 0))
 
-;;: インデントのハイライト
+;;: インデントをハイライトする
 (use-package highlight-indentation
   :ensure t
+  :hook ((emacs-lisp-mode . highlight-indentation-current-column-mode)
+         (yaml-mode . highlight-indentation-current-column-mode)
+         (python-mode . highlight-indentation-current-column-mode)
+         (js2-mode . highlight-indentation-current-column-mode)
+         (go-mode . highlight-symbol-mode))
   :config
-  ;; (set-face-background 'highlight-indentation-face "#40483e")  ; 色の指定
-  (add-hook 'python-mode-hook 'highlight-indentation-current-column-mode)
-  (add-hook 'yaml-mode-hook 'highlight-indentation-current-column-mode)
-  (add-hook 'emacs-lisp-mode-hook 'highlight-indentation-current-column-mode)
-  (add-hook 'js2-mode-hook 'highlight-indentation-current-column-mode)
-  (add-hook 'js2-jsx-mode-hook 'highlight-indentation-current-column-mode))
+  ;; 色の指定
+  (set-face-background 'highlight-indentation-face "#40483e"))
 
-;;; コメントアウト
-(use-package comment-dwim-2
-  :ensure t
-  :config
-  (autoload 'comment-dwim-2 "comment-dwim-2")
-  (setq comment-dwim-2--inline-comment-behavior 'reindent-comment)
-  (global-set-key (kbd "M-;") 'comment-dwim-2))
-
-;;; ペインの回転
+;;; ペインのレイアウトを回転させる
 (use-package rotate
   :ensure t
-  :config
-  (autoload 'rotate "rotate")
-  (global-set-key (kbd "M-o") 'rotate-layout)
-  (global-set-key (kbd "C-x C-o") 'rotate-window))
+  :bind (("M-o" . rotate-layout)
+         ("C-x C-o" . rotate-window)))
 
-;;; 検索・置換機能の拡張
-(use-package anzu
-  :ensure t
-  :diminish anzu-mode
-  :config
-  (autoload 'anzu "anzu")
-  (global-anzu-mode +1)
-  (setq anzu-search-threshold 1000)
-  (setq anzu-minimum-input-length 3)
-  (global-set-key (kbd "C-c r") 'anzu-query-replace)
-  (global-set-key (kbd "C-c R") 'anzu-query-replace-regexp))
-
-;;; 選択範囲を拡張
+;;; キーバインドで選択範囲を拡張する
 (use-package expand-region
   :ensure t
-  :config
-  (autoload 'expand-region "expand-region")
-  (global-set-key (kbd "C-\]") 'er/expand-region)       ; リージョンを広げる
-  (global-set-key (kbd "C-M-\]") 'er/contract-region))  ; リージョンを狭める
+  :bind (("C-\]" . er/expand-region)
+         ("C-M-\]" . 'er/contract-region)))
 
-;;; 複数カーソル
+;;; マルチカーソルを使えるようにする
 (use-package multiple-cursors
-  :ensure t
-  :config
-  (autoload 'multiple-cursors "multiple-cursors"))
+  :ensure t)
 
 ;;; prefixによる連続操作のキーバインド設定
 (use-package smartrep
   :ensure t
   :config
-  (global-set-key "\C-t" nil)
+  (bind-key "C-t" nil)
   (smartrep-define-key
       global-map "C-t" '(("C-n" . 'mc/mark-next-like-this)
                          ("C-p" . 'mc/mark-previous-like-this)
@@ -305,142 +286,145 @@
                          ("C-s" . 'mc/skip-to-next-like-this)
                          ("*"   . 'mc/mark-all-like-this))))
 
+
+;:; ==================================================
+;;; モード設定
+;;; ==================================================
+
+;;; dired
+;; dired-x を使用する
+(use-package dired-x
+  :bind (:map dired-mode-map
+              ("RET" . dired-find-alternate-file)
+              ("r" . wdired-change-to-wdired-mode))
+  :config
+  ;; dired-find-alternate-file の有効化
+  (put 'dired-find-alternate-file 'disabled nil)
+  ;; 二つのdiredバッファを開いているとき、R や C のデフォルトの宛先がもう片方のディレクトリになる
+  (setq dired-dwim-target t))
+
+;; Docker コンテナ内のファイル編集
+(use-package docker-tramp
+  :ensure t
+  :config
+  (set-variable 'docker-tramp-use-names t)
+  (require 'docker-tramp-compat))
+
+;;; anzu
+(use-package anzu
+  :ensure t
+  :diminish anzu-mode
+  :config
+  (global-anzu-mode 1)
+  (setq anzu-search-threshold 1000)
+  (setq anzu-minimum-input-length 3)
+  (bind-keys ("C-c r" . anzu-query-replace)
+             ("C-c R" . anzu-query-replace-regexp)))
+
 ;;; helm
 ;; helm本体
-(use-package helm-config
+(use-package helm-files
   :ensure helm
   :diminish helm-mode
   :config
   (helm-mode 1)
-  ;; helm用キーバインド
-  (define-key helm-map (kbd "C-h") 'delete-backward-char)
-  (define-key helm-find-files-map (kbd "C-h") 'delete-backward-char)
-  (define-key helm-find-files-map (kbd "TAB") 'helm-execute-persistent-action)
-  (define-key helm-read-file-map (kbd "TAB") 'helm-execute-persistent-action)
-  (global-set-key (kbd "M-y") 'helm-show-kill-ring)
-  (global-set-key (kbd "M-x") 'helm-M-x)
-  (define-key global-map (kbd "C-x C-f") 'helm-find-files)
-  (define-key global-map (kbd "C-x b") 'helm-for-files)
-  (define-key global-map (kbd "C-c m") 'helm-mini)
-  (define-key global-map (kbd "C-c s") 'helm-regexp)
-  (define-key global-map (kbd "C-c g") 'helm-grep-do-git-grep)
-
-  ;; TABでnew bufferが作成しない(ファイルがない時は何もしない)
+  (bind-keys ("M-y" . helm-show-kill-ring)
+             ("M-x" . helm-M-x)
+             ("C-x C-f" . helm-find-files)
+             ("C-x b" . helm-for-files)
+             ("C-c m" . helm-mini)
+             ("C-c s" . helm-regexp)
+             ("C-c g" . helm-grep-do-git-grep)
+             :map helm-map
+             ("C-h" . delete-backward-char)
+             :map helm-find-files-map
+             ("C-h" . delete-backward-char)
+             ("TAB" . helm-execute-persistent-action)
+             :map helm-read-file-map
+             ("TAB" . helm-execute-persistent-action))
+  ;; TAB で new buffer が作成されない (ファイルがない時は何もしない)
   (defadvice helm-ff-kill-or-find-buffer-fname (around execute-only-if-exist activate)
     "Execute command only if CANDIDATE exists"
     (when (file-exists-p candidate)
       ad-do-it))
-
   ;; helm-buffers-list の詳細情報を非表示
   (setq helm-buffer-details-flag nil))
-
 
 ;; silversearcher-ag で検索を高速化
 (use-package helm-ag
   :ensure t
-  :bind ("C-c g" . helm-do-ag)
   :config
-  (setq helm-ag-insert-at-point 'symbol))
+  (setq helm-ag-insert-at-point 'symbol)
+  (bind-keys ("C-c g" . helm-do-ag)))
 
-;; helmでキーバインドを表示
+;; helm でキーバインドを表示
 (use-package helm-descbinds
   :ensure t
-  :config
-  ;; helm-descbinds用キーバインド
+  :bind (("C-c b" . helm-descbinds)))
 
-  (global-set-key (kbd "C-c b") 'helm-descbinds))
-
-
-;; gitプロジェクト内の全ファイル検索
+;; git プロジェクト内の全ファイル検索
 (use-package helm-ls-git
   :ensure t
-  :config
-  (global-set-key (kbd "C-c l") 'helm-ls-git-ls))
+  :bind (("C-c l" . helm-ls-git-ls)))
 
-
-;; helmでtrampを実行
+;; helm で tramp を実行
 (use-package helm-tramp
-  :ensure t)
+  :ensure t
+  :commands (helm-tramp))
 
 ;; helm-swoop
 (use-package helm-swoop
   :ensure t
+  :bind (("M-i" . helm-swoop)
+         ("M-I" . helm-swoop-back-to-last-point)
+         ("C-c M-i" . helm-multi-swoop)
+         ("C-x M-i" . helm-multi-swoop-all)
+         :map helm-swoop-map
+         ("C-r" . helm-previous-line)
+         ("C-s" . helm-next-line)
+         ("M-i" . helm-multi-swoop-all-from-helm-swoop)
+         :map helm-multi-swoop-map
+         ("C-r" . helm-previous-line)
+         ("C-s" . helm-next-line)
+         :map isearch-mode-map
+         ("M-i" . helm-swoop-from-isearch))
   :config
-  ;; Change the keybinds to whatever you like :)
-  (global-set-key (kbd "M-i") 'helm-swoop)
-  (global-set-key (kbd "M-I") 'helm-swoop-back-to-last-point)
-  (global-set-key (kbd "C-c M-i") 'helm-multi-swoop)
-  (global-set-key (kbd "C-x M-i") 'helm-multi-swoop-all)
-  ;; Move up and down like isearch
-  (define-key helm-swoop-map (kbd "C-r") 'helm-previous-line)
-  (define-key helm-swoop-map (kbd "C-s") 'helm-next-line)
-  (define-key helm-multi-swoop-map (kbd "C-r") 'helm-previous-line)
-  (define-key helm-multi-swoop-map (kbd "C-s") 'helm-next-line)
-  ;; When doing isearch, hand the word over to helm-swoop
-  (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
-  ;; From helm-swoop to helm-multi-swoop-all
-  (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
-
   ;; Save buffer when helm-multi-swoop-edit complete
   (setq helm-multi-swoop-edit-save t)
-
   ;; If this value is t, split window inside the current window
   (setq helm-swoop-split-with-multiple-windows nil)
-
   ;; Split direcion. 'split-window-vertically or 'split-window-horizontally
   (setq helm-swoop-split-direction 'split-window-horizontally)
-
   ;; If nil, you can slightly boost invoke speed in exchange for text color
   (setq helm-swoop-speed-or-color t)
-
   ;; If you prefer fuzzy matching
   (setq helm-swoop-use-fuzzy-match nil))
 
-;; プロジェクト管理機能
+;;; projectile
 (use-package projectile
   :ensure t
   :config
   (projectile-mode))
 
-;; プロジェクト管理機能の Helm 統合
+;; projectile の Helm 統合
 (use-package helm-projectile
   :ensure t
   :config
-  ;; (setq projectile-completion-system 'helm)
+  (setq projectile-completion-system 'helm)
+  (bind-keys :map projectile-mode-map
+             ("C-c C-p" . projectile-command-map))
   (helm-projectile-on))
 
 ;;; company (補完機能)
 (use-package company
   :ensure t
   :config
-  (autoload 'company "company")
-  ;; 基本設定
-  (global-company-mode)                   ; 全バッファでcompanyを有効にする
-  (setq company-idle-delay 0)             ; デフォルトは0.5
-  (setq company-minimum-prefix-length 2)  ; デフォルトは4
-  (setq company-selection-wrap-around t)  ; 一番下の候補で下を押すと最初に戻る
-  (setq company-dabbrev-downcase nil)     ; lowercaseで補完される機能の停止
-
-  ;; 不要なキーバインドを解除
-  (define-key company-active-map (kbd "M-n") nil)
-  (define-key company-active-map (kbd "M-p") nil)
-
-  ;; C-M-i で手動補完
-  (global-set-key (kbd "C-M-i") 'company-complete)
-
-  ;; 関数のドキュメントをミニバッファに表示
-  (define-key company-active-map (kbd "C-d") 'company-show-doc-buffer)
-
-  ;; C-n, C-pで補完候補を次/前の候補を選択
-  (define-key company-active-map (kbd "C-n") 'company-select-next)
-  (define-key company-active-map (kbd "C-p") 'company-select-previous)
-  (define-key company-search-map (kbd "C-n") 'company-select-next)
-  (define-key company-search-map (kbd "C-p") 'company-select-previous)
-
-  ;; 候補が1つならばtabで補完、複数候補があればtabで次の候補へ行く
-  (define-key company-active-map (kbd "C-i") 'company-complete-common-or-cycle)
-
-  ;; デフォルトではdocumentに移動できないのでcompany-doc-bufferを固定する
+  (global-company-mode)                  ; 全バッファでcompanyを有効にする
+  (setq company-idle-delay 0)            ; デフォルトは0.5
+  (setq company-minimum-prefix-length 2) ; デフォルトは4
+  (setq company-selection-wrap-around t) ; 一番下の候補で下を押すと最初に戻る
+  (setq company-dabbrev-downcase nil)    ; lowercaseで補完される機能の停止
+  ;; デフォルトでは document に移動できないので company-doc-buffer を固定する
   (defun my/company-show-doc-buffer ()
     "Temporarily show the documentation buffer for the selection."
     (interactive)
@@ -450,188 +434,143 @@
       (with-current-buffer doc-buffer
         (goto-char (point-min)))
       (display-buffer doc-buffer t)))
-  (define-key company-active-map (kbd "M-d") #'my/company-show-doc-buffer)
-
-  ;; 関数のドキュメントをポップアップ表示(terminal上では動作しない)
-  ;; (el-get-bundle company-quickhelp)
-  ;; (el-get-bundle pos-tip)
-  ;; (require 'company-quickhelp)
-  ;; (company-quickhelp-mode 1)
-  )
-
+  
+  (bind-keys ("C-M-i" . company-complete)      ; C-M-i で手動補完
+             :map company-active-map
+             ("M-n" . nil)                     ; 不要なキーバインドを解除
+             ("M-p" . nil)                     ; 不要なキーバインドを解除
+             ("C-d" . company-show-doc-buffer) ; 関数のドキュメントをミニバッファに表示
+             ("C-n" . company-select-next)     ; C-n で次の補完候補を選択
+             ("C-p" . company-select-previous) ; C-p で前の補完候補を選択
+             ;; 候補が1つならばtabで補完、複数候補があればtabで次の候補へ行く
+             ("C-i" . company-complete-common-or-cycle)
+             ("M-d" . my/company-show-doc-buffer)
+             :map company-search-map
+             ("C-n" . company-select-next)     ; C-n で次の補完候補を選択
+             ("C-p" . company-select-previous) ; C-p で前の補完候補を選択
+             ))
 
 ;;; flycheck (シンタックスチェック)
 (use-package flycheck
   :ensure t
   :config
   (global-flycheck-mode)
-
-
   ;; 保存時に自動チェック
   (setq flycheck-check-syntax-automatically '(mode-enabled save))
+  (bind-keys ("M-g l" . flycheck-list-errors)))
 
-  ;; キーバインド
-  ;; (define-key global-map (kbd "C-c n") 'flycheck-next-error)
-  ;; (define-key global-map (kbd "C-c p") 'flycheck-previous-error)
-  ;; (define-key global-map (kbd "C-c l") 'flycheck-list-errors)
-  (define-key global-map (kbd "M-g l") 'flycheck-list-errors))
-
+;;; editorconfig の有効化
+(use-package editorconfig
+  :ensure t
+  :diminish editorconfig-mode
+  :config
+  (editorconfig-mode 1))
 
 ;;; markdown
 (use-package markdown-mode
   :ensure t
-  :config
-  (autoload 'markdown-mode "markdown-mode"
-    "major mode for editing Markdown files" t)
-  (add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
-  (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
-  (autoload 'gfm-mode "gfm-mode"
-    "Major mode for editing GitHub Flavored Markdown files" t)
-  (add-to-list 'auto-mode-alist '("README\\.md\\'" . gfm-mode)))
-
+  :mode (("\\.markdown\\'" . markdown-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("README\\.md\\'" . gfm-mode)))
 
 ;;; yaml
 (use-package yaml-mode
-  :ensure t
-  :mode (("\\.raml\\'" . yaml-mode)))
-
+  :ensure t)
 
 ;;; json
 (use-package json-mode
-   :ensure t
-  :config
-  ;; (add-to-list 'auto-mode-alist '("\\.json\\'" . json-mode))
-  )
+  :ensure t)
 
 ;;; docker
 (use-package dockerfile-mode
   :ensure t)
 
+;;; ansible
+(use-package ansible
+  :ensure t)
 
-;;; JavaScript
-;; (use-package company-tern
-;;   :ensure t
-;;   :mode (("\\.js$" . js2-mode))
-;;   ;; :mode (("\\.js$" . js2-jsx-mode))
-;;   )
-
-;; (use-package js2-mode
-;;   :ensure t
-;;   :config
-;;   (setq js-indent-level 2)    ; jsのインデント設定
-;;   (add-hook 'js2-mode-hook 'tern-mode)
-;;   ;; (add-hook 'js2-jsx-mode-hook 'tern-mode)
-;;   (add-to-list 'company-backends 'company-tern)  ; backendに追加
-
-;; (eval-after-load 'flycheck
-;;   '(custom-set-variables
-;;     '(flycheck-disabled-checkers '(javascript-jshint javascript-jscs))))
-
-;; ;; ESlint と競合する js2-mode の機能を無効化
-;; (setq js2-include-browser-externs nil)
-;; (setq js2-mode-show-parse-errors nil)
-;; (setq js2-mode-show-strict-warnings nil)
-;; (setq js2-highlight-external-variables nil)
-;; (setq js2-include-jslint-globals nil))
+(use-package js
+  :ensure t
+  :mode ("\\.js\\'" . js-mode)
+  :config
+  (setq js-indent-level 2))
 
 (use-package company-tern
   :ensure t
-  :mode (("\\.js$" . js-mode))
+  :hook ((js-mode . tern-mode))
+  :config
   )
-
-(setq js-indent-level 2)    ; jsのインデント設定
-(add-hook 'js-mode-hook 'tern-mode)
-(add-to-list 'company-backends 'company-tern)  ; backendに追加
+(add-to-list 'company-backends 'company-tern)
 
 (use-package add-node-modules-path
   :ensure t
-  :config
-  (eval-after-load 'js-mode
-    '(add-hook 'js-mode-hook #'add-node-modules-path)))
+  :hook (js-mode . add-node-modules-path))
 
 (use-package js-auto-format-mode
   :ensure t
+  :hook (js-mode . js-auto-format-mode)
   :config
-  (add-hook 'js-mode-hook 'js-auto-format-mode)
   (custom-set-variables
    '(js-auto-format-command "prettier-eslint")
    '(js-auto-format-command-args "--write")))
 
 ;;; Python
-(use-package company-jedi
-  :ensure t)
-(use-package py-autopep8
-  :ensure t)
-(use-package yasnippet
-  :ensure t)
-(use-package py-isort
-  :ensure t)
+(use-package python
+  :ensure company-jedi
+  :ensure py-autopep8
+  :ensure py-isort
+  :hook ((python-mode . (lambda()
+                          (set (make-local-variable 'company-backends)
+                               '(company-jedi)))))
+  :config
+  ;;; jedi の設定
+  (setq jedi:complete-on-dot t)
+  (setq jedi:use-shortcuts t)
+  ;; (add-to-list 'company-backends 'company-jedi)
+  ;; 補完したいライブラリのパスを追加
+  ;; (setenv "PYTHONPATH" "/path")
+  ;; 関数定義ジャンプ
+  (defvar jedi:goto-stack '())
+  (defun jedi:jump-to-definition ()
+    (interactive)
+    (add-to-list 'jedi:goto-stack
+                 (list (buffer-name) (point)))
+    (jedi:goto-definition))
+  (defun jedi:jump-back ()
+    (interactive)
+    (let ((p (pop jedi:goto-stack)))
+      (if p (progn
+              (switch-to-buffer (nth 0 p))
+              (goto-char (nth 1 p))))))
+  (bind-keys :map python-mode-map
+             ("C-c C-d" . jedi:show-doc)
+             ("M-." . jedi:jump-to-definition)
+             ("M-," . jedi:jump-back))
 
-(add-hook 'python-mode-hook
-          '(lambda()
-             ;; 関数補完 (company-jedi)
-             (require 'jedi-core)
-             (setq jedi:complete-on-dot t)
-             (setq jedi:use-shortcuts t)
-             (add-to-list 'company-backends 'company-jedi) ; backendに追加
-             ;; 補完したいライブラリのパスを追加
-             ;; (setenv "PYTHONPATH" "/path")
-             ;; (setenv "PYTHONPATH" "/home/vagrant/.pyenv/versions/miniconda3-4.0.5/envs/mlflow/lib/python3.5/site-packages:/home/vagrant/.pyenv/versions/miniconda3-4.0.5/envs/data-analysys/lib/python3.5/site-packages:/home/vagrant/.pyenv/shims")
-             ;; (setenv "PYTHONPATH" "/Users/sci01553/.pyenv/versions/miniconda3-4.0.5/envs/mlflow/lib/python3.5/site-packages:/Users/sci01553/.pyenv/versions/miniconda3-4.0.5/envs/data-analysys/lib/python3.5/site-packages:/home/vagrant/.pyenv/shims")
-             (define-key python-mode-map "\C-c \C-d" 'jedi:show-doc)
+  ;; PEP8のチェック
+  (py-autopep8-enable-on-save)
+  (add-hook 'before-save-hook 'py-autopep8-before-save)
+  (setq py-autopep8-options '("--max-line-length=79"))
+  (bind-keys :map python-mode-map
+             ("C-c f" . py-autopep8))
 
-             ;; 関数定義ジャンプ
-             (defvar jedi:goto-stack '())
-             (defun jedi:jump-to-definition ()
-               (interactive)
-               (add-to-list 'jedi:goto-stack
-                            (list (buffer-name) (point)))
-               (jedi:goto-definition))
-             (defun jedi:jump-back ()
-               (interactive)
-               (let ((p (pop jedi:goto-stack)))
-                 (if p (progn
-                        (switch-to-buffer (nth 0 p))
-                        (goto-char (nth 1 p))))))
-             (define-key python-mode-map "\M-." 'jedi:jump-to-definition)
-             (define-key python-mode-map "\M-," 'jedi:jump-back)
-             ;; (define-key python-mode-map "\C-c r" 'helm-jedi-related-names)
-
-             ;; PEP8のチェック
-             (require 'py-autopep8)
-             (py-autopep8-enable-on-save)
-             (add-hook 'before-save-hook 'py-autopep8-before-save)
-             (setq py-autopep8-options '("--max-line-length=160"))
-             (define-key python-mode-map "\C-c f" 'py-autopep8)
-             
-             ;; スニペット
-             (require 'yasnippet)
-             (yas-global-mode 1)
-
-             ;; isort を保存前に実行
-             (require 'py-isort)
-             (add-hook 'before-save-hook 'py-isort-before-save)
-             ))
-
+  ;; isort を保存前に実行
+  (add-hook 'before-save-hook 'py-isort-before-save))
 
 ;;; Golang
 (use-package go-mode
-  :ensure t)
-(use-package company-go
-  :ensure t)
-
-;; 諸々の有効化、設定
-(add-hook 'go-mode-hook 'company-mode)
-(add-hook 'go-mode-hook 'flycheck-mode)
-(add-hook 'go-mode-hook (lambda ()
-                          (setq gofmt-command "goimports")
-                          (add-hook 'before-save-hook 'gofmt-before-save)
-                          (set (make-local-variable 'company-backends) '(company-go))
-                          (company-mode)
-                          (set (make-local-variable 'compile-command)
-                               "go build -v && go test -v && go vet")
-                          (local-set-key (kbd "M-.") 'godef-jump))
-                          (go-eldoc-setup)
-                          )
+  :ensure company-go
+  :hook ((go-mode . go-eldoc-setup)
+         (go-mode . company-mode)
+         (go-mode . flycheck-mode)
+         (go-mode . (lambda()
+                      (set (make-local-variable 'company-backends) '(company-go))
+                      (set (make-local-variable 'compile-command)
+                           "go build -v && go test -v && go vet"))))
+  :config
+  (setq gofmt-command "goimports")
+  (add-hook 'before-save-hook 'gofmt-before-save)
+  (bind-keys :map go-mode-map
+             ("M-." . godef-jump)))
 
 ;;; init.el ends here
