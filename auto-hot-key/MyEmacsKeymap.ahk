@@ -715,7 +715,11 @@ if (m_IsEnabled()) {
 Return
 ^r::
 if (m_IsEnabled()) {
+    if (A_PriorHotkey = "^q") {
+        Send %A_ThisHotkey%
+} else {
     m_ISearchBackward()
+}
 } else {
     Send %A_ThisHotkey%
 }
