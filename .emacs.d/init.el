@@ -575,3 +575,17 @@
              ("M-." . godef-jump)))
 
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (company-go py-isort py-autopep8 company-jedi js-auto-format-mode add-node-modules-path company-tern ansible dockerfile-mode json-mode yaml-mode markdown-mode editorconfig flycheck company helm-projectile projectile helm-swoop helm-tramp helm-ls-git helm-descbinds helm-ag helm anzu docker-tramp smartrep multiple-cursors expand-region rotate highlight-indentation highlight-symbol comment-dwim-2 exec-path-from-shell monokai-theme diminish use-package))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
