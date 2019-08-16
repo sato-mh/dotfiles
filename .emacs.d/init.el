@@ -47,13 +47,13 @@
 ;;; 環境設定
 ;;; ==================================================
 
-;;; 環境を日本語、UTF-8にする
-(set-language-environment "Japanese")
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-(set-buffer-file-coding-system 'utf-8)
-(set-default-coding-systems 'utf-8)
-(prefer-coding-system 'utf-8)
+;; ;;; 環境を日本語、UTF-8にする
+;; (set-language-environment "Japanese")
+;; (set-terminal-coding-system 'utf-8)
+;; (set-keyboard-coding-system 'utf-8)
+;; (set-buffer-file-coding-system 'utf-8)
+;; (set-default-coding-systems 'utf-8)
+;; (prefer-coding-system 'utf-8)
 
 ;;; 曖昧な幅の文字を全角に固定する
 ;; See: https://github.com/hamano/locale-eaw
@@ -95,8 +95,8 @@
 ;;; 1 行ごとにスクロールする
 (setq scroll-conservatively 1)
 
-;;; バッファを自動更新する
-(global-auto-revert-mode 1)
+;; ;;; バッファを自動更新する
+;; (global-auto-revert-mode 1)
 
 ;;; shell の環境変数引継ぎ
 (use-package exec-path-from-shell
@@ -575,17 +575,3 @@
              ("M-." . godef-jump)))
 
 ;;; init.el ends here
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   (quote
-    (company-go py-isort py-autopep8 company-jedi js-auto-format-mode add-node-modules-path company-tern ansible dockerfile-mode json-mode yaml-mode markdown-mode editorconfig flycheck company helm-projectile projectile helm-swoop helm-tramp helm-ls-git helm-descbinds helm-ag helm anzu docker-tramp smartrep multiple-cursors expand-region rotate highlight-indentation highlight-symbol comment-dwim-2 exec-path-from-shell monokai-theme diminish use-package))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
