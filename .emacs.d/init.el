@@ -108,7 +108,8 @@
 ;;; ==================================================
 
 ;;; 前の文字を削除
-(bind-keys :map key-translation-map ("C-h" . "<DEL>"))
+(keyboard-translate ?\C-h ?\C-?)
+;; (bind-keys :map key-translation-map ("C-h" . "<DEL>"))
 
 ;;; 前の単語を削除
 (bind-keys ("M-h" . backward-kill-word))
@@ -491,6 +492,13 @@
 (use-package ansible
   :ensure t)
 
+;;; shell
+(use-package sh-script
+  :ensure t
+  :config
+  (setq sh-basic-offset 2)
+  (setq sh-shell-file "/bin/bash"))
+
 ;;; js
 (use-package js
   :mode ("\\.js\\'" . js-mode)
@@ -518,9 +526,9 @@
 ;;; Python
 (use-package python
   :ensure company-jedi
-  :ensure py-autopep8
+  :ensure py-yapf
   :ensure py-isort
-  :hook ((python-mode . py-autopep8-enable-on-save))
+  :hook ((python-mode . py-yapf-enable-on-save))
   :config
   ;; company の補完候補に jedi を追加
   (add-to-list 'company-backends 'company-jedi)
@@ -545,7 +553,7 @@
              ("M-," . jedi:jump-back))
 
   ;; autopep8 の 1 行の最大文字数を設定
-  (setq py-autopep8-options '("--max-line-length=79"))
+  ;; (setq py-autopep8-options '("--max-line-length=79"))
   ;; 保存時に isort を実行
   (add-hook 'before-save-hook 'py-isort-before-save))
 
