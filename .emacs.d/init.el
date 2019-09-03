@@ -115,10 +115,10 @@
 (bind-keys ("M-h" . backward-kill-word))
 
 ;;; ペインの移動
-;; (bind-keys ("C-c C-b" . windmove-left)
-;;            ("C-c C-n" . windmove-down)
-;;            ("C-c C-p" . windmove-up)
-;;            ("C-c C-f" . windmove-right))
+(bind-keys ("C-c C-b" . windmove-left)
+           ("C-c C-n" . windmove-down)
+           ("C-c C-p" . windmove-up)
+           ("C-c C-f" . windmove-right))
 
 ;;; バッファの手動更新
 (bind-keys ([f5] . revert-buffer))
@@ -204,8 +204,8 @@
 ;;; 列数を表示する
 (column-number-mode 1)
 
-;;; カーソル行をハイライトしない
-(global-hl-line-mode 0)
+;;; カーソル行をハイライト
+(global-hl-line-mode 1)
 
 ;;; 対応する括弧を光らせる
 (use-package paren
@@ -235,7 +235,8 @@
          (yaml-mode . highlight-symbol-mode)
          (python-mode . highlight-symbol-mode)
          (js-mode . highlight-symbol-mode)
-         (go-mode . highlight-symbol-mode))
+         (go-mode . highlight-symbol-mode)
+         (sh-mode . highligh-symbol-mode))
   :bind (("M-n" . highlight-symbol-next)
          ("M-p" . highlight-symbol-prev))
   :config
@@ -254,8 +255,9 @@
   :hook ((emacs-lisp-mode . highlight-indentation-current-column-mode)
          (yaml-mode . highlight-indentation-current-column-mode)
          (python-mode . highlight-indentation-current-column-mode)
-         (js2-mode . highlight-indentation-current-column-mode)
-         (go-mode . highlight-symbol-mode))
+         (js-mode . highlight-indentation-current-column-mode)
+         (go-mode . highlight-indentation-current-column-mode)
+         (sh-mode . highlight-indentation-current-column-mode))
   :config
   ;; 色の指定
   (set-face-background 'highlight-indentation-face "#40483e"))
@@ -296,10 +298,10 @@
 ;;; dired
 ;; dired-x を使用する
 (use-package dired-x
-  :bind (:map dired-mode-map
-              ("RET" . dired-find-alternate-file)
-              ("r" . wdired-change-to-wdired-mode))
   :config
+  (bind-keys :map dired-mode-map
+             ("RET" . dired-find-alternate-file)
+             ("r" . wdired-change-to-wdired-mode))
   ;; dired-find-alternate-file の有効化
   (put 'dired-find-alternate-file 'disabled nil)
   ;; 二つのdiredバッファを開いているとき、R や C のデフォルトの宛先がもう片方のディレクトリになる
@@ -320,7 +322,9 @@
   (global-anzu-mode 1)
   (setq anzu-search-threshold 1000)
   (setq anzu-minimum-input-length 3)
-  (bind-keys ("C-c r" . anzu-query-replace)
+  (bind-keys ("M-%" . anzu-query-replace)
+             ("C-c r" . anzu-query-replace)
+             ("C-M-%" . anzu-query-replace-regexp)
              ("C-c R" . anzu-query-replace-regexp)))
 
 ;;; helm
@@ -564,7 +568,7 @@
          (go-mode . company-mode)
          (go-mode . flycheck-mode)
          (go-mode . (lambda()
-                      ;; company の補完候補に jedi を追加
+                      ;; company の補完候補に company-go を追加
                       (set (make-local-variable 'company-backends) '(company-go))
                       (set (make-local-variable 'compile-command)
                            "go build -v && go test -v && go vet"))))
