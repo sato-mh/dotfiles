@@ -12,5 +12,6 @@ ln -sf $WORK_DIR/linux/.gitignore ~/.gitignore
 ln -sf $WORK_DIR/linux/.inputrc ~/.inputrc
 ln -sf $WORK_DIR/linux/.tern-config ~/.tern-config
 ln -sf $WORK_DIR/linux/.tmux.conf ~/.tmux.conf
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 exec $SHELL
