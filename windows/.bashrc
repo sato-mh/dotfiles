@@ -160,3 +160,6 @@ eval $(cat ~/.ssh-agent.out) 1> /dev/null
 # gopath
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
+
+# mingw
+export PATH=/mingw64/bin/:$PATH
