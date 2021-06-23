@@ -291,7 +291,7 @@
                          ("*"   . 'mc/mark-all-like-this))))
 
 
-;:; ==================================================
+;;; ==================================================
 ;;; モード設定
 ;;; ==================================================
 
@@ -369,14 +369,14 @@
   :bind (("C-c b" . helm-descbinds)))
 
 ;; git プロジェクト内の全ファイル検索
-(use-package helm-ls-git
-  :ensure t
-  :bind (("C-c l" . helm-ls-git-ls)))
+;; (use-package helm-ls-git
+;;   :ensure t
+;;   :bind (("C-c l" . helm-ls-git-ls)))
 
 ;; helm で tramp を実行
-(use-package helm-tramp
-  :ensure t
-  :commands (helm-tramp))
+;; (use-package helm-tramp
+;;   :ensure t
+;;   :commands (helm-tramp))
 
 ;; helm-swoop
 (use-package helm-swoop
@@ -467,11 +467,11 @@
   (bind-keys ("M-g l" . flycheck-list-errors)))
 
 ;;; editorconfig の有効化
-(use-package editorconfig
-  :ensure t
-  :diminish editorconfig-mode
-  :config
-  (editorconfig-mode 1))
+;; (use-package editorconfig
+;;   :ensure t
+;;   :diminish editorconfig-mode
+;;   :config
+;;   (editorconfig-mode 1))
 
 ;;; markdown
 (use-package markdown-mode
@@ -496,6 +496,10 @@
 (use-package ansible
   :ensure t)
 
+;;; jinja2
+(use-package jinja2-mode
+  :ensure t)
+
 ;;; shell
 (use-package sh-script
   :ensure t
@@ -508,12 +512,13 @@
   :mode ("\\.js\\'" . js-mode)
   :config
   (setq js-indent-level 2)
-  ;; company の補完候補に jedi を追加
-  (add-to-list 'company-backends 'company-tern))
+  ;; company の補完候補に tern を追加
+  (add-to-list 'company-backends 'company-tern)
+  )
 
-(use-package company-tern
-  :ensure t
-  :hook ((js-mode . tern-mode)))
+;; (use-package company-tern
+;;   :ensure t
+;;   :hook ((js-mode . tern-mode)))
 
 (use-package add-node-modules-path
   :ensure t
@@ -579,3 +584,15 @@
              ("M-." . godef-jump)))
 
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages '(helm diminish use-package)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

@@ -115,10 +115,10 @@
 (bind-keys ("M-h" . backward-kill-word))
 
 ;;; ペインの移動
-;; (bind-keys ("C-c C-b" . windmove-left)
-;;            ("C-c C-n" . windmove-down)
-;;            ("C-c C-p" . windmove-up)
-;;            ("C-c C-f" . windmove-right))
+(bind-keys ("C-c C-b" . windmove-left)
+           ("C-c C-n" . windmove-down)
+           ("C-c C-p" . windmove-up)
+           ("C-c C-f" . windmove-right))
 
 ;;; バッファの手動更新
 (bind-keys ([f5] . revert-buffer))
@@ -204,8 +204,8 @@
 ;;; 列数を表示する
 (column-number-mode 1)
 
-;;; カーソル行をハイライトしない
-(global-hl-line-mode 0)
+;;; カーソル行をハイライト
+(global-hl-line-mode 1)
 
 ;;; 対応する括弧を光らせる
 (use-package paren
@@ -235,7 +235,8 @@
          (yaml-mode . highlight-symbol-mode)
          (python-mode . highlight-symbol-mode)
          (js-mode . highlight-symbol-mode)
-         (go-mode . highlight-symbol-mode))
+         (go-mode . highlight-symbol-mode)
+         (sh-mode . highligh-symbol-mode))
   :bind (("M-n" . highlight-symbol-next)
          ("M-p" . highlight-symbol-prev))
   :config
@@ -254,8 +255,9 @@
   :hook ((emacs-lisp-mode . highlight-indentation-current-column-mode)
          (yaml-mode . highlight-indentation-current-column-mode)
          (python-mode . highlight-indentation-current-column-mode)
-         (js2-mode . highlight-indentation-current-column-mode)
-         (go-mode . highlight-symbol-mode))
+         (js-mode . highlight-indentation-current-column-mode)
+         (go-mode . highlight-indentation-current-column-mode)
+         (sh-mode . highlight-indentation-current-column-mode))
   :config
   ;; 色の指定
   (set-face-background 'highlight-indentation-face "#40483e"))
@@ -289,17 +291,17 @@
                          ("*"   . 'mc/mark-all-like-this))))
 
 
-;:; ==================================================
+;;; ==================================================
 ;;; モード設定
 ;;; ==================================================
 
 ;;; dired
 ;; dired-x を使用する
 (use-package dired-x
-  :bind (:map dired-mode-map
-              ("RET" . dired-find-alternate-file)
-              ("r" . wdired-change-to-wdired-mode))
   :config
+  (bind-keys :map dired-mode-map
+             ("RET" . dired-find-alternate-file)
+             ("r" . wdired-change-to-wdired-mode))
   ;; dired-find-alternate-file の有効化
   (put 'dired-find-alternate-file 'disabled nil)
   ;; 二つのdiredバッファを開いているとき、R や C のデフォルトの宛先がもう片方のディレクトリになる
@@ -320,7 +322,9 @@
   (global-anzu-mode 1)
   (setq anzu-search-threshold 1000)
   (setq anzu-minimum-input-length 3)
-  (bind-keys ("C-c r" . anzu-query-replace)
+  (bind-keys ("M-%" . anzu-query-replace)
+             ("C-c r" . anzu-query-replace)
+             ("C-M-%" . anzu-query-replace-regexp)
              ("C-c R" . anzu-query-replace-regexp)))
 
 ;;; helm
@@ -365,14 +369,14 @@
   :bind (("C-c b" . helm-descbinds)))
 
 ;; git プロジェクト内の全ファイル検索
-(use-package helm-ls-git
-  :ensure t
-  :bind (("C-c l" . helm-ls-git-ls)))
+;; (use-package helm-ls-git
+;;   :ensure t
+;;   :bind (("C-c l" . helm-ls-git-ls)))
 
 ;; helm で tramp を実行
-(use-package helm-tramp
-  :ensure t
-  :commands (helm-tramp))
+;; (use-package helm-tramp
+;;   :ensure t
+;;   :commands (helm-tramp))
 
 ;; helm-swoop
 (use-package helm-swoop
@@ -463,13 +467,13 @@
   (bind-keys ("M-g l" . flycheck-list-errors)))
 
 ;;; editorconfig の有効化
-(use-package editorconfig
-  :ensure t
-  :diminish editorconfig-mode
-  :config
-  (editorconfig-mode 1))
+;; (use-package editorconfig
+;;   :ensure t
+;;   :diminish editorconfig-mode
+;;   :config
+;;   (editorconfig-mode 1))
 
-;;; markdown
+;; markdown
 (use-package markdown-mode
   :ensure t
   :mode (("\\.markdown\\'" . markdown-mode)
@@ -492,17 +496,29 @@
 (use-package ansible
   :ensure t)
 
+;;; jinja2
+(use-package jinja2-mode
+  :ensure t)
+
+;;; shell
+(use-package sh-script
+  :ensure t
+  :config
+  (setq sh-basic-offset 2)
+  (setq sh-shell-file "/bin/bash"))
+
 ;;; js
 (use-package js
   :mode ("\\.js\\'" . js-mode)
   :config
   (setq js-indent-level 2)
-  ;; company の補完候補に jedi を追加
-  (add-to-list 'company-backends 'company-tern))
+  ;; company の補完候補に tern を追加
+  ;; (add-to-list 'company-backends 'company-tern)
+  )
 
-(use-package company-tern
-  :ensure t
-  :hook ((js-mode . tern-mode)))
+;; (use-package company-tern
+;;   :ensure t
+;;   :hook ((js-mode . tern-mode)))
 
 (use-package add-node-modules-path
   :ensure t
@@ -519,9 +535,9 @@
 ;;; Python
 (use-package python
   :ensure company-jedi
-  :ensure py-autopep8
+  :ensure py-yapf
   :ensure py-isort
-  :hook ((python-mode . py-autopep8-enable-on-save))
+  :hook ((python-mode . py-yapf-enable-on-save))
   :config
   ;; company の補完候補に jedi を追加
   (add-to-list 'company-backends 'company-jedi)
@@ -546,7 +562,7 @@
              ("M-," . jedi:jump-back))
 
   ;; autopep8 の 1 行の最大文字数を設定
-  (setq py-autopep8-options '("--max-line-length=79"))
+  ;; (setq py-autopep8-options '("--max-line-length=79"))
   ;; 保存時に isort を実行
   (add-hook 'before-save-hook 'py-isort-before-save))
 
@@ -557,7 +573,7 @@
          (go-mode . company-mode)
          (go-mode . flycheck-mode)
          (go-mode . (lambda()
-                      ;; company の補完候補に jedi を追加
+                      ;; company の補完候補に company-go を追加
                       (set (make-local-variable 'company-backends) '(company-go))
                       (set (make-local-variable 'compile-command)
                            "go build -v && go test -v && go vet"))))
@@ -568,3 +584,15 @@
              ("M-." . godef-jump)))
 
 ;;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages '(helm diminish use-package)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
