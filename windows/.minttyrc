@@ -1,10 +1,10 @@
 Font=DejaVu Sans Mono for Powerline
 FontHeight=11
 FontSmoothing=default
-Locale=ja_JP
+Locale=C
 Charset=UTF-8
 Term=xterm-256color
-Transparency=medium
+Transparency=off
 CursorType=block
 CursorBlinks=no
 BellType=0
@@ -16,3 +16,4 @@ Scrollbar=none
 BoldAsFont=no
 FontWeight=400
 FontIsBold=no
+Language=
