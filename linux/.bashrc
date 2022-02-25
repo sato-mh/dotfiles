@@ -163,3 +163,13 @@ fi
 # gopath
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
+
+# gcloud switch account by fzf
+fpj() {
+  gcloud config configurations list \
+    | awk '{ print $1,$3,$4 }' \
+    | column -t \
+    | fzf --header-lines=1 \
+    | awk '{ print $1 }' \
+    | xargs -r gcloud config configurations activate
+}
