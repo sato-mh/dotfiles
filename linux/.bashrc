@@ -125,6 +125,8 @@ if [ -f /usr/local/share/bash-completion/bash_completion ]; then
     . /usr/local/share/bash-completion/bash_completion
 elif [ -f /usr/share/bash-completion/bash_completion ]; then
     . /usr/share/bash-completion/bash_completion
+elif [ -f /usr/local/etc/bash_completion ]; then
+    . /usr/local/etc/bash_completion
 elif [ -f /etc/bash_completion ]; then
     . /etc/bash_completion
 fi
@@ -173,3 +175,27 @@ fpj() {
     | awk '{ print $1 }' \
     | xargs -r gcloud config configurations activate
 }
+
+# gcloud ssh by fzf
+fssh() {
+    local sshLoginHost
+    gcloud compute instances list > ~/tmp.instancelist
+    sshLoginHost=`cat ~/tmp.instancelist | egrep -v '^Host \*' | fzf --header-lines=1`
+    if [ "$sshLoginHost" = "" ]; then
+        # ex) Ctrl-C.
+        return 1
+    fi
+    sshLoginHost=$(echo ${sshLoginHost} | awk '{print $1}')
+    ssh $sshLoginHost
+}
+
+# kubernetes
+if type kubectl &> /dev/null; then
+  alias k=kubectl
+  complete -F __start_kubectl k
+fi
+
+# terraform
+if type terraform &> /dev/null; then
+    complete -C terraform terraform
+fi

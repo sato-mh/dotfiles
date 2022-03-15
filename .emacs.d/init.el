@@ -126,7 +126,7 @@
 ;;; Mac 用の設定
 (when (equal system-type 'darwin)
   ;; Mac のキーバインドを使う
-  (mac-key-mode 1)
+  ;; (mac-key-mode 1)
   ;; Macのoptionをメタキーにする
   ;; 下記でうまく行かなかった場合: (setq mac-option-modifier 'meta)
   (defvar mac-option-modifier 'meta))
@@ -363,7 +363,7 @@
   (setq helm-ag-insert-at-point 'symbol)
   (bind-keys ("C-c g" . helm-do-ag)))
 
-;; helm でキーバインドを表示
+;; Helm でキーバインドを表示
 (use-package helm-descbinds
   :ensure t
   :bind (("C-c b" . helm-descbinds)))
@@ -589,7 +589,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages (quote (helm diminish use-package))))
+ '(package-selected-packages '(helm diminish use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
