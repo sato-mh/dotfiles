@@ -500,6 +500,11 @@
 (use-package jinja2-mode
   :ensure t)
 
+;;; terraform
+(use-package terraform-mode
+  :ensure t
+  :hook ((terraform-mode . terraform-format-on-save-mode)))
+
 ;;; shell
 (use-package sh-script
   :ensure t
@@ -589,7 +594,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages '(helm diminish use-package)))
+ '(package-selected-packages '(terraform-mode helm diminish use-package)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
